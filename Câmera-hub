@@ -1,0 +1,1680 @@
+
+--[[
+    ██████╗ █████╗ ███╗ ███╗███████╗██████╗ █████╗ 
+    ██╔════╝██╔══██╗████╗ ████║██╔════╝██╔══██╗██╔══██╗
+    ██║ ███████║██╔████╔██║█████╗ ██████╔╝███████║
+    ██║ ██╔══██║██║╚██╔╝██║██╔══╝ ██╔══██╗██╔══██║
+    ╚██████╗██║ ██║██║ ╚═╝ ██║███████╗██║ ██║██║ ██║
+     ╚═════╝╚═╝ ╚═╝╚═╝ ╚═╝╚══════╝╚═╝ ╚═╝╚═╝ ╚═╝
+    
+    CAMERA HUB - SISTEMA COMPLETO
+    Versão: 2.1.0
+    Data: 2026
+]]
+
+-- ==================== SISTEMA DE KEY (ADICIONADO NO INÍCIO) ====================
+local player = game:GetService("Players").LocalPlayer
+local mouse = player:GetMouse()
+local TweenService = game:GetService("TweenService")
+local keyCorreta = "micael-câmera-hub-2036-kakdkwowkwn"
+local linkKey = "https://camera-hub-system--micaelsouza202.replit.app/" -- LINK ATUALIZADO
+local keyAprovada = false
+
+-- Função para criar painel de key
+local function criarPainelKey()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "KeySystem"
+    screenGui.Parent = player:WaitForChild("PlayerGui")
+    screenGui.ResetOnSpawn = false
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 350, 0, 200)
+    frame.Position = UDim2.new(0.5, -175, 0.5, -100)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    frame.BackgroundTransparency = 0.1
+    frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.Draggable = true
+    frame.Parent = screenGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = frame
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 30, 0, 30)
+    closeBtn.Position = UDim2.new(1, -35, 0, 5)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    closeBtn.Text = "×"
+    closeBtn.TextColor3 = Color3.new(1, 1, 1)
+    closeBtn.TextSize = 20
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.BorderSizePixel = 0
+    closeBtn.Parent = frame
+
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 8)
+    closeCorner.Parent = closeBtn
+
+    closeBtn.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+
+    local titulo = Instance.new("TextLabel")
+    titulo.Size = UDim2.new(1, 0, 0, 40)
+    titulo.Position = UDim2.new(0, 0, 0, 5)
+    titulo.BackgroundTransparency = 1
+    titulo.Text = "🔐 VERIFICAÇÃO DE KEY"
+    titulo.TextColor3 = Color3.new(1, 1, 1)
+    titulo.TextSize = 18
+    titulo.Font = Enum.Font.GothamBold
+    titulo.Parent = frame
+
+    local inputBox = Instance.new("TextBox")
+    inputBox.Size = UDim2.new(0.8, 0, 0, 35)
+    inputBox.Position = UDim2.new(0.1, 0, 0.4, 0)
+    inputBox.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    inputBox.TextColor3 = Color3.new(1, 1, 1)
+    inputBox.PlaceholderText = "Digite a key"
+    inputBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+    inputBox.Text = ""
+    inputBox.TextSize = 16
+    inputBox.Font = Enum.Font.Gotham
+    inputBox.ClearTextOnFocus = false
+    inputBox.Parent = frame
+
+    local inputCorner = Instance.new("UICorner")
+    inputCorner.CornerRadius = UDim.new(0, 6)
+    inputCorner.Parent = inputBox
+
+    local copyBtn = Instance.new("TextButton")
+    copyBtn.Size = UDim2.new(0, 80, 0, 30)
+    copyBtn.Position = UDim2.new(0.1, 0, 0.7, 0)
+    copyBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+    copyBtn.Text = "📋 LINK"
+    copyBtn.TextColor3 = Color3.new(1, 1, 1)
+    copyBtn.TextSize = 14
+    copyBtn.Font = Enum.Font.GothamBold
+    copyBtn.BorderSizePixel = 0
+    copyBtn.Parent = frame
+
+    local copyCorner = Instance.new("UICorner")
+    copyCorner.CornerRadius = UDim.new(0, 6)
+    copyCorner.Parent = copyBtn
+
+    copyBtn.MouseButton1Click:Connect(function()
+        setclipboard(linkKey)
+        copyBtn.Text = "✅ COPIADO"
+        task.wait(1)
+        copyBtn.Text = "📋 LINK"
+    end)
+
+    local verifyBtn = Instance.new("TextButton")
+    verifyBtn.Size = UDim2.new(0, 120, 0, 30)
+    verifyBtn.Position = UDim2.new(0.6, 0, 0.7, 0)
+    verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    verifyBtn.Text = "🔍 VERIFICAR"
+    verifyBtn.TextColor3 = Color3.new(1, 1, 1)
+    verifyBtn.TextSize = 14
+    verifyBtn.Font = Enum.Font.GothamBold
+    verifyBtn.BorderSizePixel = 0
+    verifyBtn.Parent = frame
+
+    local verifyCorner = Instance.new("UICorner")
+    verifyCorner.CornerRadius = UDim.new(0, 6)
+    verifyCorner.Parent = verifyBtn
+
+    local erroLabel = Instance.new("TextLabel")
+    erroLabel.Size = UDim2.new(1, 0, 0, 20)
+    erroLabel.Position = UDim2.new(0, 0, 0.9, 0)
+    erroLabel.BackgroundTransparency = 1
+    erroLabel.Text = ""
+    erroLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+    erroLabel.TextSize = 12
+    erroLabel.Font = Enum.Font.Gotham
+    erroLabel.Parent = frame
+
+    local function verificarKey()
+        local keyDigitada = inputBox.Text
+        if keyDigitada == keyCorreta then
+            keyAprovada = true
+            screenGui:Destroy()
+            mostrarMensagemBoasVindas()
+        else
+            erroLabel.Text = "❌ Key incorreta!"
+        end
+    end
+
+    verifyBtn.MouseButton1Click:Connect(verificarKey)
+
+    inputBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            verificarKey()
+        end
+    end)
+end
+
+local function mostrarMensagemBoasVindas()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "BoasVindas"
+    screenGui.Parent = player:WaitForChild("PlayerGui")
+    screenGui.ResetOnSpawn = false
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 400, 0, 150)
+    frame.Position = UDim2.new(0.5, -200, 0.5, -75)
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    frame.BackgroundTransparency = 0.2
+    frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.Parent = screenGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = frame
+
+    local texto = Instance.new("TextLabel")
+    texto.Size = UDim2.new(1, 0, 1, 0)
+    texto.BackgroundTransparency = 1
+    texto.Text = "SEJA BEM VINDO AO CÂMERA HUB"
+    texto.TextColor3 = Color3.new(1, 1, 1)
+    texto.TextSize = 24
+    texto.Font = Enum.Font.GothamBold
+    texto.TextWrapped = true
+    texto.Parent = frame
+
+    frame.BackgroundTransparency = 0.8
+    texto.TextTransparency = 0.8
+    local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local fadeIn = TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 0.2})
+    local fadeInText = TweenService:Create(texto, tweenInfo, {TextTransparency = 0})
+    fadeIn:Play()
+    fadeInText:Play()
+
+    task.wait(5)
+
+    local fadeOut = TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1})
+    local fadeOutText = TweenService:Create(texto, tweenInfo, {TextTransparency = 1})
+    fadeOut:Play()
+    fadeOutText:Play()
+    fadeOut.Completed:Connect(function()
+        screenGui:Destroy()
+    end)
+end
+
+criarPainelKey()
+
+repeat task.wait() until keyAprovada
+
+-- ==================== SISTEMA DE VERSÃO ====================
+local VERSION = "2.1.0"
+local SCRIPT_URL = "https://raw.githubusercontent.com/seu_usuario/seu_repo/main/camera_hub.lua"
+local GITHUB_RAW_URL = "https://raw.githubusercontent.com/seu_usuario/seu_repo/main/version.txt"
+
+local function checkForUpdates()
+    local success, result = pcall(function()
+        return game:HttpGet(GITHUB_RAW_URL)
+    end)
+    
+    if success and result then
+        local latestVersion = result:match("VERSION=(%d+%.%d+%.%d+)")
+        if latestVersion and latestVersion ~= VERSION then
+            return true, latestVersion
+        end
+    end
+    return false, VERSION
+end
+
+local function updateScript()
+    local success, newScript = pcall(function()
+        return game:HttpGet(SCRIPT_URL)
+    end)
+    
+    if success and newScript then
+        return true, newScript
+    end
+    return false, nil
+end
+
+-- ==================== INTERFACE DE ATUALIZAÇÃO ====================
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Sistema Completo v" .. VERSION,
+    LoadingTitle = "Camera Hub",
+    LoadingSubtitle = "Versão " .. VERSION,
+    Theme = "Dark"
+})
+
+local SectionVersao = Window:CreateTab("🔄 Atualizações", 4483362458)
+
+local versionLabel = SectionVersao:CreateLabel("📌 Versão Atual: " .. VERSION)
+local updateStatus = SectionVersao:CreateLabel("🔍 Verificando atualizações...")
+
+SectionVersao:CreateButton({
+    Name = "🔍 Verificar Atualizações",
+    Callback = function()
+        updateStatus:Set("⏳ Verificando...")
+        task.wait(1)
+        
+        local hasUpdate, latestVer = checkForUpdates()
+        
+        if hasUpdate then
+            updateStatus:Set("✅ Nova versão disponível: " .. latestVer)
+            Rayfield:Notify({
+                Title = "Atualização Disponível",
+                Content = "Versão " .. latestVer .. " disponível!",
+                Duration = 5
+            })
+        else
+            updateStatus:Set("✅ Você está na versão mais recente!")
+            Rayfield:Notify({
+                Title = "Sem Atualizações",
+                Content = "Versão " .. VERSION .. " é a mais recente",
+                Duration = 3
+            })
+        end
+    end
+})
+
+local updateButton = SectionVersao:CreateButton({
+    Name = "⬇️ ATUALIZAR SCRIPT",
+    Callback = function()
+        updateStatus:Set("⏳ Baixando atualização...")
+        
+        local success, newScript = updateScript()
+        
+        if success and newScript then
+            updateStatus:Set("✅ Script atualizado! Recarregando...")
+            Rayfield:Notify({
+                Title = "Atualização Concluída",
+                Content = "Script atualizado com sucesso!",
+                Duration = 3
+            })
+            
+            for _, v in pairs(getconnections(game:GetService("CoreGui").ChildAdded)) do
+                v:Disable()
+            end
+            
+            task.wait(1)
+            loadstring(newScript)()
+            
+            local gui = script:FindFirstAncestorWhichIsA("ScreenGui")
+            if gui then gui:Destroy() end
+        else
+            updateStatus:Set("❌ Erro ao baixar atualização!")
+            Rayfield:Notify({
+                Title = "Erro",
+                Content = "Não foi possível atualizar o script",
+                Duration = 3
+            })
+        end
+    end
+})
+
+SectionVersao:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
+SectionVersao:CreateLabel("📋 Instruções:")
+SectionVersao:CreateLabel("1. Clique em 'Verificar Atualizações'")
+SectionVersao:CreateLabel("2. Se houver atualização, clique em")
+SectionVersao:CreateLabel(" 'ATUALIZAR SCRIPT'")
+SectionVersao:CreateLabel("3. O script será recarregado")
+SectionVersao:CreateLabel(" automaticamente")
+SectionVersao:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
+
+spawn(function()
+    task.wait(2)
+    local hasUpdate, latestVer = checkForUpdates()
+    if hasUpdate then
+        updateStatus:Set("⚠️ Nova versão " .. latestVer .. " disponível!")
+        Rayfield:Notify({
+            Title = "Atualização Disponível",
+            Content = "Versão " .. latestVer .. " disponível! Vá em 'Atualizações'",
+            Duration = 7
+        })
+    else
+        updateStatus:Set("✅ Versão " .. VERSION .. " atualizada!")
+    end
+end)
+
+-- ==================== SECTIONS RENOMEADAS ====================
+local SectionCriacaoCameras = Window:CreateTab("📷 Criação de Câmeras", 4483362458)
+local SectionCameras = Window:CreateTab("👁️ Visão das Câmeras", 4483362458)
+local SectionMovimento = Window:CreateTab("🏃 Movimento", 4483362458)
+local SectionPortais = Window:CreateTab("🌀 Portais", 4483362458)
+local SectionPlacas = Window:CreateTab("📋 Criação de Placas", 4483362458)
+
+-- ==================== SERVIÇOS ====================
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local cam = workspace.CurrentCamera
+
+-- ==================== VARIÁVEIS CÂMERAS ====================
+local cameras = {}
+local cameraAtual = 1
+local vendoCamera = false
+local speedAtivo = false
+local speedValor = 16
+
+-- ==================== VARIÁVEIS PORTAIS ====================
+local portalAtivo = false
+local modoClique = false
+local formatoPortal = "Cilindro"
+local portaisAtivos = {}
+local paresPortais = {}
+local numerosDisponiveis = {}
+local maiorNumero = 0
+local teleportCooldown = {}
+local mouse = player:GetMouse()
+
+local portaisSelecionados = {}
+local alturaPortalClique = 3
+local tempoTeleporteCooldown = 1
+local tamanhoPortal = 6
+local distanciaAparicao = 3
+local ladoAparicao = "Frente"
+local transparenciaPortal = 0.3
+local rotacaoPortal = 0
+
+-- ==================== VARIÁVEIS DE CONTROLE DO SCRIPT ====================
+local scriptAtivo = true
+local conexoesEventos = {}
+local loopsAtivos = {}
+
+-- ==================== VARIÁVEIS PLACAS ====================
+local placas = {}
+local proximoNumeroPlaca = 1
+local tecladoGUI = nil
+local placaSelecionadaParaEdicao = nil
+local textoDigitado = ""
+local tecladoAtivo = false
+
+-- Cores disponíveis para placas
+local coresPlacas = {
+    Marrom = Color3.fromRGB(139, 69, 19),
+    Vermelho = Color3.fromRGB(255, 0, 0),
+    Azul = Color3.fromRGB(0, 0, 255),
+    Verde = Color3.fromRGB(0, 255, 0),
+    Amarelo = Color3.fromRGB(255, 255, 0),
+    Preto = Color3.fromRGB(0, 0, 0),
+    Branco = Color3.fromRGB(255, 255, 255)
+}
+
+-- ==================== FUNÇÕES CÂMERAS ====================
+local function criarCameraRealista(position)
+    local model = Instance.new("Model")
+    model.Name = "Camera3D"
+    model.Parent = workspace
+
+    local corpo = Instance.new("Part")
+    corpo.Size = Vector3.new(3, 2.5, 2.8)
+    corpo.Material = Enum.Material.SmoothPlastic
+    corpo.Color = Color3.fromRGB(25, 25, 25)
+    corpo.Anchored = true
+    corpo.CanCollide = false
+    corpo.CFrame = position
+    corpo.Parent = model
+
+    -- Adicionar propriedades para melhor visão à distância
+    local cameraPart = Instance.new("Camera")
+    cameraPart.Parent = model
+    cameraPart.Name = "CameraPart"
+    cameraPart.CFrame = position * CFrame.new(0, 0, 5)
+    
+    -- Criar um ponto de luz para ajudar na visibilidade
+    local pointLight = Instance.new("PointLight")
+    pointLight.Parent = corpo
+    pointLight.Range = 50
+    pointLight.Brightness = 2
+    pointLight.Color = Color3.fromRGB(255, 255, 200)
+
+    -- Restante do modelo da câmera...
+    local topo = Instance.new("Part")
+    topo.Size = Vector3.new(2.5, 0.8, 1.8)
+    topo.Material = Enum.Material.SmoothPlastic
+    topo.Color = Color3.fromRGB(30, 30, 30)
+    topo.Anchored = true
+    topo.CanCollide = false
+    topo.CFrame = corpo.CFrame * CFrame.new(0, 1.65, 0.3)
+    topo.Parent = model
+
+    local flash = Instance.new("Part")
+    flash.Shape = Enum.PartType.Ball
+    flash.Size = Vector3.new(0.5, 0.5, 0.5)
+    flash.Material = Enum.Material.Neon
+    flash.Color = Color3.fromRGB(255, 255, 200)
+    flash.Anchored = true
+    flash.CanCollide = false
+    flash.CFrame = topo.CFrame * CFrame.new(-0.8, 0, -0.6)
+    flash.Parent = model
+
+    local lente = Instance.new("Part")
+    lente.Shape = Enum.PartType.Cylinder
+    lente.Size = Vector3.new(1.2, 2.2, 2.2)
+    lente.Material = Enum.Material.Glass
+    lente.Color = Color3.fromRGB(15, 15, 20)
+    lente.Transparency = 0.2
+    lente.Reflectance = 0.6
+    lente.Anchored = true
+    lente.CanCollide = false
+    lente.CFrame = corpo.CFrame * CFrame.new(0, -0.2, -2) * CFrame.Angles(0, 0, math.rad(90))
+    lente.Parent = model
+
+    model.PrimaryPart = corpo
+    return corpo
+end
+
+player.CharacterAdded:Connect(function(char)
+    task.wait(0.5)
+    if scriptAtivo and vendoCamera and #cameras > 0 then
+        cam.CameraType = Enum.CameraType.Custom
+        cam.CameraSubject = cameras[cameraAtual]
+        -- Ajustar propriedades da câmera para melhor visão à distância
+        cam.FieldOfView = 70
+        cam.Focus = cameras[cameraAtual].CFrame * CFrame.new(0, 0, -100)
+    end
+    if scriptAtivo and speedAtivo then
+        local humanoid = char:WaitForChild("Humanoid", 5)
+        if humanoid then
+            humanoid.WalkSpeed = speedValor
+        end
+    end
+end)
+
+-- Função para melhorar a visão da câmera
+local function melhorarVisaoCamera()
+    if vendoCamera and #cameras > 0 then
+        cam.FieldOfView = 70
+        -- Remover limites de distância da câmera
+        cam.MaxZoomDistance = math.huge
+        cam.MinZoomDistance = 0.5
+    end
+end
+
+-- ==================== FUNÇÕES PORTAIS ====================
+local function gerarCores()
+    local hue = math.random(0, 360)
+    local cor1 = Color3.fromHSV(hue / 360, 0.8, 1)
+    local cor2 = Color3.fromHSV(hue / 360, 0.5, 1)
+    return cor1, cor2
+end
+
+local function obterProximoNumero()
+    if #numerosDisponiveis > 0 then
+        table.sort(numerosDisponiveis)
+        return table.remove(numerosDisponiveis, 1)
+    else
+        maiorNumero = maiorNumero + 1
+        return maiorNumero
+    end
+end
+
+local function liberarNumero(numero)
+    table.insert(numerosDisponiveis, numero)
+end
+
+local function teleportarJogador(dePortal, paraPortal)
+    if not scriptAtivo then return end
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+    local playerName = player.Name
+    if teleportCooldown[playerName] then return end
+    teleportCooldown[playerName] = true
+    
+    local novaPosicao
+    if ladoAparicao == "Frente" then
+        novaPosicao = paraPortal.CFrame * CFrame.new(0, 0, -distanciaAparicao)
+    elseif ladoAparicao == "Trás" then
+        novaPosicao = paraPortal.CFrame * CFrame.new(0, 0, distanciaAparicao)
+    elseif ladoAparicao == "Esquerda" then
+        novaPosicao = paraPortal.CFrame * CFrame.new(-distanciaAparicao, 0, 0)
+    elseif ladoAparicao == "Direita" then
+        novaPosicao = paraPortal.CFrame * CFrame.new(distanciaAparicao, 0, 0)
+    elseif ladoAparicao == "Cima" then
+        novaPosicao = paraPortal.CFrame * CFrame.new(0, distanciaAparicao, 0)
+    elseif ladoAparicao == "Baixo" then
+        novaPosicao = paraPortal.CFrame * CFrame.new(0, -distanciaAparicao, 0)
+    end
+    
+    player.Character:SetPrimaryPartCFrame(novaPosicao)
+    task.wait(tempoTeleporteCooldown)
+    teleportCooldown[playerName] = nil
+end
+
+local function criarPortal(posicao, olhandoPara)
+    if not scriptAtivo then return end
+    if not player.Character then return end
+    local numeroPortal = obterProximoNumero()
+    local numeroPar = (numeroPortal % 2 == 1) and numeroPortal + 1 or numeroPortal - 1
+    local indicePar = math.ceil(numeroPortal / 2)
+    
+    if not paresPortais[indicePar] then
+        local cor1, cor2 = gerarCores()
+        paresPortais[indicePar] = {cor1 = cor1, cor2 = cor2}
+    end
+    
+    local cor = (numeroPortal % 2 == 1) and paresPortais[indicePar].cor1 or paresPortais[indicePar].cor2
+    local portal = Instance.new("Part")
+    portal.Name = "Portal_" .. numeroPortal
+    portal.Anchored = true
+    portal.CanCollide = false
+    portal.Material = Enum.Material.Neon
+    portal.Color = cor
+    portal.Transparency = transparenciaPortal
+    
+    local cframe = CFrame.new(posicao, posicao + olhandoPara) * CFrame.Angles(0, math.rad(rotacaoPortal), 0)
+    
+    if formatoPortal == "Cilindro" then
+        portal.Shape = Enum.PartType.Cylinder
+        portal.Size = Vector3.new(0.5, tamanhoPortal, tamanhoPortal)
+        portal.CFrame = cframe * CFrame.Angles(0, math.rad(90), 0)
+    elseif formatoPortal == "Esfera" then
+        portal.Shape = Enum.PartType.Ball
+        portal.Size = Vector3.new(tamanhoPortal, tamanhoPortal, tamanhoPortal)
+        portal.CFrame = cframe
+    elseif formatoPortal == "Retângulo" then
+        portal.Shape = Enum.PartType.Block
+        portal.Size = Vector3.new(0.5, tamanhoPortal * 1.3, tamanhoPortal * 0.8)
+        portal.CFrame = cframe
+    elseif formatoPortal == "Quadrado" then
+        portal.Shape = Enum.PartType.Block
+        portal.Size = Vector3.new(0.5, tamanhoPortal, tamanhoPortal)
+        portal.CFrame = cframe
+    elseif formatoPortal == "Triângulo" then
+        portal.Shape = Enum.PartType.Block
+        portal.Size = Vector3.new(0.5, tamanhoPortal, tamanhoPortal)
+        portal.CFrame = cframe
+        local wedge1 = Instance.new("WedgePart")
+        wedge1.Size = Vector3.new(0.5, tamanhoPortal * 0.5, tamanhoPortal)
+        wedge1.Material = Enum.Material.Neon
+        wedge1.Color = cor
+        wedge1.Transparency = transparenciaPortal
+        wedge1.Anchored = true
+        wedge1.CanCollide = false
+        wedge1.CFrame = portal.CFrame * CFrame.new(0, tamanhoPortal * 0.25, 0) * CFrame.Angles(0, 0, math.rad(180))
+        wedge1.Parent = portal
+    end
+    
+    portal.Parent = workspace
+    
+    local billboard = Instance.new("BillboardGui")
+    billboard.Size = UDim2.new(0, 100, 0, 100)
+    billboard.Adornee = portal
+    billboard.AlwaysOnTop = true
+    billboard.Parent = portal
+    
+    local textoNumero = Instance.new("TextLabel")
+    textoNumero.Size = UDim2.new(1, 0, 1, 0)
+    textoNumero.BackgroundTransparency = 1
+    textoNumero.Text = tostring(numeroPortal)
+    textoNumero.Font = Enum.Font.GothamBold
+    textoNumero.TextSize = 70
+    textoNumero.TextColor3 = Color3.new(1, 1, 1)
+    textoNumero.TextStrokeTransparency = 0
+    textoNumero.TextStrokeColor3 = Color3.new(0, 0, 0)
+    textoNumero.Parent = billboard
+    
+    local function criarZona(offsetZ)
+        local zona = Instance.new("Part")
+        zona.Name = "Zona_" .. numeroPortal
+        zona.Size = Vector3.new(tamanhoPortal + 1, tamanhoPortal + 3, 2)
+        zona.Transparency = 1
+        zona.CanCollide = false
+        zona.Anchored = true
+        zona.CFrame = portal.CFrame * CFrame.new(0, 0, offsetZ)
+        zona.Parent = portal
+        zona.Touched:Connect(function(hit)
+            if not scriptAtivo then return end
+            if hit.Parent and hit.Parent:FindFirstChild("Humanoid") then
+                if hit.Parent.Name == player.Name then
+                    local portalDestino = portaisAtivos[numeroPar]
+                    if portalDestino then teleportarJogador(portal, portalDestino) end
+                end
+            end
+        end)
+    end
+    
+    criarZona(3)
+    criarZona(-3)
+    portaisAtivos[numeroPortal] = portal
+    Rayfield:Notify({Title = "Portal #" .. numeroPortal .. " Criado", Content = "Teleporta para Portal #" .. numeroPar, Duration = 2})
+end
+
+local function processarNumeros(texto)
+    local numeros = {}
+    for parte in string.gmatch(texto, "[^,]+") do
+        parte = parte:match("^%s*(.-)%s*$")
+        if string.find(parte, "-") then
+            local inicio, fim = string.match(parte, "(%d+)%-(%d+)")
+            if inicio and fim then
+                inicio, fim = tonumber(inicio), tonumber(fim)
+                for i = inicio, fim do table.insert(numeros, i) end
+            end
+        else
+            local num = tonumber(parte)
+            if num then table.insert(numeros, num) end
+        end
+    end
+    return numeros
+end
+
+local function atualizarAlturaPortaisSelecionados(novaAltura)
+    for _, numero in ipairs(portaisSelecionados) do
+        local portal = portaisAtivos[numero]
+        if portal and portal.Parent then
+            local posicaoAtual = portal.Position
+            portal.Position = Vector3.new(posicaoAtual.X, posicaoAtual.Y + novaAltura, posicaoAtual.Z)
+        end
+    end
+end
+
+local function atualizarTamanhoPortaisSelecionados(novoTamanho)
+    for _, numero in ipairs(portaisSelecionados) do
+        local portal = portaisAtivos[numero]
+        if portal and portal.Parent then
+            if portal.Shape == Enum.PartType.Cylinder then
+                portal.Size = Vector3.new(0.5, novoTamanho, novoTamanho)
+            elseif portal.Shape == Enum.PartType.Ball then
+                portal.Size = Vector3.new(novoTamanho, novoTamanho, novoTamanho)
+            elseif portal.Shape == Enum.PartType.Block then
+                if portal.Size.Y > portal.Size.Z then
+                    portal.Size = Vector3.new(0.5, novoTamanho * 1.3, novoTamanho * 0.8)
+                else
+                    portal.Size = Vector3.new(0.5, novoTamanho, novoTamanho)
+                end
+            end
+            for _, child in ipairs(portal:GetChildren()) do
+                if child:IsA("WedgePart") then
+                    child.Size = Vector3.new(0.5, novoTamanho * 0.5, novoTamanho)
+                    child.CFrame = portal.CFrame * CFrame.new(0, novoTamanho * 0.25, 0) * CFrame.Angles(0, 0, math.rad(180))
+                end
+            end
+            for _, child in ipairs(portal:GetChildren()) do
+                if child.Name:match("Zona_") then
+                    child.Size = Vector3.new(novoTamanho + 1, novoTamanho + 3, 2)
+                end
+            end
+        end
+    end
+end
+
+local function atualizarTransparenciaPortaisSelecionados(novaTransparencia)
+    for _, numero in ipairs(portaisSelecionados) do
+        local portal = portaisAtivos[numero]
+        if portal and portal.Parent then
+            portal.Transparency = novaTransparencia
+            for _, child in ipairs(portal:GetChildren()) do
+                if child:IsA("WedgePart") then child.Transparency = novaTransparencia end
+            end
+        end
+    end
+end
+
+local function atualizarRotacaoPortaisSelecionados(novaRotacao)
+    for _, numero in ipairs(portaisSelecionados) do
+        local portal = portaisAtivos[numero]
+        if portal and portal.Parent then
+            local posicaoAtual = portal.Position
+            local novoCFrame = CFrame.new(posicaoAtual) * CFrame.Angles(0, math.rad(novaRotacao), 0)
+            if portal.Shape == Enum.PartType.Cylinder then
+                portal.CFrame = novoCFrame * CFrame.Angles(0, math.rad(90), 0)
+            else
+                portal.CFrame = novoCFrame
+            end
+            for _, child in ipairs(portal:GetChildren()) do
+                if child.Name:match("Zona_") then
+                    local offset = child.CFrame.Z > portal.CFrame.Z and 3 or -3
+                    child.CFrame = portal.CFrame * CFrame.new(0, 0, offset)
+                end
+            end
+        end
+    end
+end
+
+-- ==================== FUNÇÕES PLACAS ====================
+local function criarTeclado()
+    if tecladoGUI then
+        tecladoGUI:Destroy()
+        tecladoGUI = nil
+    end
+    
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "TecladoPlaca"
+    screenGui.Parent = player:WaitForChild("PlayerGui")
+    screenGui.ResetOnSpawn = false
+    tecladoGUI = screenGui
+    
+    -- Fundo semi-transparente
+    local background = Instance.new("Frame")
+    background.Size = UDim2.new(1, 0, 1, 0)
+    background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    background.BackgroundTransparency = 0.5
+    background.Parent = screenGui
+    
+    -- Frame do teclado
+    local tecladoFrame = Instance.new("Frame")
+    tecladoFrame.Size = UDim2.new(0, 400, 0, 350)
+    tecladoFrame.Position = UDim2.new(0.5, -200, 0.6, -175)
+    tecladoFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    tecladoFrame.BorderSizePixel = 0
+    tecladoFrame.Parent = screenGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = tecladoFrame
+    
+    -- Label que mostra o texto digitado (acima do teclado)
+    local displayLabel = Instance.new("TextLabel")
+    displayLabel.Size = UDim2.new(0.9, 0, 0, 50)
+    displayLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
+    displayLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    displayLabel.BackgroundTransparency = 0
+    displayLabel.Text = ""
+    displayLabel.TextColor3 = Color3.new(1, 1, 1)
+    displayLabel.TextSize = 20
+    displayLabel.Font = Enum.Font.Gotham
+    displayLabel.TextXAlignment = Enum.TextXAlignment.Left
+    displayLabel.Parent = tecladoFrame
+    
+    local displayCorner = Instance.new("UICorner")
+    displayCorner.CornerRadius = UDim.new(0, 8)
+    displayCorner.Parent = displayLabel
+    
+    -- Botão ENTER (acima do teclado)
+    local enterBtn = Instance.new("TextButton")
+    enterBtn.Size = UDim2.new(0, 100, 0, 40)
+    enterBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
+    enterBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    enterBtn.Text = "✓ ENTER"
+    enterBtn.TextColor3 = Color3.new(1, 1, 1)
+    enterBtn.TextSize = 16
+    enterBtn.Font = Enum.Font.GothamBold
+    enterBtn.BorderSizePixel = 0
+    enterBtn.Parent = tecladoFrame
+    
+    local enterCorner = Instance.new("UICorner")
+    enterCorner.CornerRadius = UDim.new(0, 8)
+    enterCorner.Parent = enterBtn
+    
+    -- Layout do teclado (linhas)
+    local linhasTeclado = {
+        {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"},
+        {"Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"},
+        {"A", "S", "D", "F", "G", "H", "J", "K", "L"},
+        {"Z", "X", "C", "V", "B", "N", "M", "⌫", "␣"}
+    }
+    
+    local yOffset = 0.35
+    local buttonWidth = 0.085
+    local buttonHeight = 0.08
+    
+    for linhaIndex, linha in ipairs(linhasTeclado) do
+        local totalButtons = #linha
+        local startX = (1 - (totalButtons * buttonWidth)) / 2
+        
+        for btnIndex, letra in ipairs(linha) do
+            local btn = Instance.new("TextButton")
+            btn.Size = UDim2.new(0, 35, 0, 35)
+            btn.Position = UDim2.new(startX + (btnIndex - 1) * buttonWidth, 0, yOffset, 0)
+            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+            btn.Text = letra
+            btn.TextColor3 = Color3.new(1, 1, 1)
+            btn.TextSize = 18
+            btn.Font = Enum.Font.GothamBold
+            btn.BorderSizePixel = 0
+            btn.Parent = tecladoFrame
+            
+            local btnCorner = Instance.new("UICorner")
+            btnCorner.CornerRadius = UDim.new(0, 6)
+            btnCorner.Parent = btn
+            
+            btn.MouseButton1Click:Connect(function()
+                if letra == "⌫" then
+                    textoDigitado = textoDigitado:sub(1, -2)
+                elseif letra == "␣" then
+                    textoDigitado = textoDigitado .. " "
+                else
+                    textoDigitado = textoDigitado .. letra
+                end
+                displayLabel.Text = textoDigitado
+            end)
+        end
+        yOffset = yOffset + 0.12
+    end
+    
+    enterBtn.MouseButton1Click:Connect(function()
+        if placaSelecionadaParaEdicao and placas[placaSelecionadaParaEdicao] then
+            -- Atualizar texto na placa
+            local placaInfo = placas[placaSelecionadaParaEdicao]
+            if placaInfo.surfaceGui then
+                for _, child in ipairs(placaInfo.surfaceGui:GetChildren()) do
+                    if child:IsA("TextLabel") then
+                        child.Text = textoDigitado
+                        child.TextScaled = true
+                        child.TextWrapped = true
+                    end
+                end
+            end
+            Rayfield:Notify({Title = "Texto Atualizado", Content = "Placa #" .. placaSelecionadaParaEdicao, Duration = 2})
+        end
+        -- Fechar teclado
+        if tecladoGUI then
+            tecladoGUI:Destroy()
+            tecladoGUI = nil
+        end
+        tecladoAtivo = false
+        textoDigitado = ""
+    end)
+end
+
+-- NOVA FUNÇÃO: Criar placa com suporte (pauzinho)
+local function criarPlaca(posicao, facingDirection)
+    if not scriptAtivo then return end
+    
+    local numeroPlaca = proximoNumeroPlaca
+    proximoNumeroPlaca = proximoNumeroPlaca + 1
+    
+    -- Criar MODEL para agrupar placa e suporte
+    local model = Instance.new("Model")
+    model.Name = "Placa_" .. numeroPlaca
+    model.Parent = workspace
+    
+    -- Calcular CFrame para a placa ficar virada para o jogador
+    local playerPos = player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position or posicao
+    local direction = (playerPos - posicao).Unit
+    local cframe = CFrame.new(posicao, posicao + Vector3.new(direction.X, 0, direction.Z))
+    
+    -- ====== PLACA PRINCIPAL (maior: 6x3 para caber mais texto) ======
+    local placa = Instance.new("Part")
+    placa.Name = "PlacaPrincipal"
+    placa.Size = Vector3.new(6, 3, 0.2) -- Aumentado de 4x2 para 6x3
+    placa.Material = Enum.Material.Wood
+    placa.Color = Color3.fromRGB(139, 69, 19) -- Marrom
+    placa.Anchored = true
+    placa.CanCollide = false
+    placa.CFrame = cframe * CFrame.new(0, 1.5, 0) -- Elevado para ficar acima do suporte
+    placa.Parent = model
+    
+    -- ====== SUPORTE (pauzinho embaixo da placa) ======
+    local suporte = Instance.new("Part")
+    suporte.Name = "Suporte"
+    suporte.Size = Vector3.new(0.4, 2.5, 0.4) -- Pauzinho fino
+    suporte.Material = Enum.Material.Wood
+    suporte.Color = Color3.fromRGB(101, 67, 33) -- Marrom mais escuro
+    suporte.Anchored = true
+    suporte.CanCollide = false
+    -- Posicionar o suporte no centro da placa, descendo para baixo
+    suporte.CFrame = cframe * CFrame.new(0, 0.25, 0) -- Parte inferior da placa na altura 0.25
+    suporte.Parent = model
+    
+    -- ====== BASE DO SUPORTE (opcional, para dar estabilidade) ======
+    local base = Instance.new("Part")
+    base.Name = "Base"
+    base.Size = Vector3.new(1, 0.3, 1)
+    base.Material = Enum.Material.Wood
+    base.Color = Color3.fromRGB(101, 67, 33)
+    base.Anchored = true
+    base.CanCollide = false
+    base.CFrame = cframe * CFrame.new(0, -1.15, 0) -- Base no chão
+    base.Parent = model
+    
+    -- SurfaceGui para o texto (na placa principal)
+    local surfaceGui = Instance.new("SurfaceGui")
+    surfaceGui.Face = Enum.NormalId.Front
+    surfaceGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+    surfaceGui.PixelsPerStud = 50
+    surfaceGui.Parent = placa
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = ""
+    textLabel.TextColor3 = Color3.new(1, 1, 1)
+    textLabel.TextSize = 30
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.TextScaled = true
+    textLabel.TextWrapped = true
+    textLabel.Parent = surfaceGui
+    
+    -- Billboard para o número (acima da placa)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Size = UDim2.new(0, 60, 0, 60)
+    billboard.Adornee = placa
+    billboard.AlwaysOnTop = true
+    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+    billboard.Parent = model
+    
+    local numeroLabel = Instance.new("TextLabel")
+    numeroLabel.Size = UDim2.new(1, 0, 1, 0)
+    numeroLabel.BackgroundTransparency = 1
+    numeroLabel.Text = tostring(numeroPlaca)
+    numeroLabel.TextColor3 = Color3.new(1, 1, 1)
+    numeroLabel.TextSize = 40
+    numeroLabel.Font = Enum.Font.GothamBold
+    numeroLabel.TextStrokeTransparency = 0
+    numeroLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+    numeroLabel.Parent = billboard
+    
+    -- ClickDetector para editar texto (na placa principal)
+    local clickDetector = Instance.new("ClickDetector")
+    clickDetector.Parent = placa
+    clickDetector.MaxActivationDistance = 20
+    
+    clickDetector.MouseClick:Connect(function()
+        if not scriptAtivo then return end
+        placaSelecionadaParaEdicao = numeroPlaca
+        textoDigitado = ""
+        if tecladoGUI then
+            tecladoGUI:Destroy()
+            tecladoGUI = nil
+        end
+        criarTeclado()
+        tecladoAtivo = true
+    end)
+    
+    -- Armazenar referências (usando a placa principal como referência)
+    placas[numeroPlaca] = {
+        model = model,
+        part = placa,
+        suporte = suporte,
+        base = base,
+        surfaceGui = surfaceGui,
+        textLabel = textLabel,
+        numero = numeroPlaca
+    }
+    
+    Rayfield:Notify({Title = "Placa Criada", Content = "Placa #" .. numeroPlaca .. " (com suporte)", Duration = 2})
+end
+
+local function mudarCorPlaca(numeroPlaca, cor)
+    if placas[numeroPlaca] and placas[numeroPlaca].part then
+        placas[numeroPlaca].part.Color = cor
+        -- Também mudar cor do suporte e base para combinar?
+        if placas[numeroPlaca].suporte then
+            placas[numeroPlaca].suporte.Color = Color3.fromRGB(cor.R * 0.7, cor.G * 0.7, cor.B * 0.7)
+        end
+        if placas[numeroPlaca].base then
+            placas[numeroPlaca].base.Color = Color3.fromRGB(cor.R * 0.7, cor.G * 0.7, cor.B * 0.7)
+        end
+        Rayfield:Notify({Title = "Cor Alterada", Content = "Placa #" .. numeroPlaca .. " mudou de cor", Duration = 1.5})
+    else
+        Rayfield:Notify({Title = "Erro", Content = "Placa #" .. numeroPlaca .. " não encontrada", Duration = 2})
+    end
+end
+
+local function mudarTextoPlaca(numeroPlaca, novoTexto)
+    if placas[numeroPlaca] and placas[numeroPlaca].textLabel then
+        placas[numeroPlaca].textLabel.Text = novoTexto
+        Rayfield:Notify({Title = "Texto Alterado", Content = "Placa #" .. numeroPlaca, Duration = 1.5})
+    else
+        Rayfield:Notify({Title = "Erro", Content = "Placa #" .. numeroPlaca .. " não encontrada", Duration = 2})
+    end
+end
+
+local function deletarPlaca(numeroPlaca)
+    if placas[numeroPlaca] then
+        if placas[numeroPlaca].model then
+            placas[numeroPlaca].model:Destroy()
+        elseif placas[numeroPlaca].part then
+            placas[numeroPlaca].part:Destroy()
+        end
+        placas[numeroPlaca] = nil
+        Rayfield:Notify({Title = "Placa Deletada", Content = "Placa #" .. numeroPlaca .. " removida", Duration = 2})
+    end
+end
+
+local function limparTodasPlacas()
+    for _, placaInfo in pairs(placas) do
+        if placaInfo.model then
+            placaInfo.model:Destroy()
+        elseif placaInfo.part then
+            placaInfo.part:Destroy()
+        end
+    end
+    placas = {}
+    proximoNumeroPlaca = 1
+    Rayfield:Notify({Title = "Todas Placas", Content = "Todas as placas foram removidas", Duration = 2})
+end
+
+-- ==================== FUNÇÃO DE DESATIVAÇÃO COMPLETA ====================
+local function desativarScriptCompleto()
+    scriptAtivo = false
+    
+    -- Desativar visão da câmera
+    vendoCamera = false
+    cam.CameraType = Enum.CameraType.Custom
+    local char = player.Character
+    if char then
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            cam.CameraSubject = humanoid
+        end
+    end
+    
+    -- Resetar velocidade
+    speedAtivo = false
+    if char and char:FindFirstChildOfClass("Humanoid") then
+        char.Humanoid.WalkSpeed = 16
+    end
+    
+    -- Fechar todas as GUIs
+    for _, gui in ipairs(player.PlayerGui:GetChildren()) do
+        if gui:IsA("ScreenGui") and (gui.Name == "Rayfield" or gui.Name == "KeySystem" or gui.Name == "BoasVindas" or gui.Name == "TecladoPlaca") then
+            gui:Destroy()
+        end
+    end
+    
+    -- Fechar Rayfield especificamente
+    if Rayfield and Rayfield.Close then
+        Rayfield:Close()
+    end
+    
+    print("Script desativado completamente!")
+end
+
+-- ==================== ABA Criação de Câmeras ====================
+SectionCriacaoCameras:CreateButton({
+    Name = "📷 Criar Câmera Realista",
+    Callback = function()
+        if not scriptAtivo then return end
+        local char = player.Character
+        if not char then return end
+        local head = char:FindFirstChild("Head")
+        if not head then return end
+        local cameraPart = criarCameraRealista(head.CFrame * CFrame.new(0, 3, -5))
+        table.insert(cameras, cameraPart)
+        cameraAtual = #cameras
+        Rayfield:Notify({Title = "✅ Câmera Criada", Content = "Câmera realista #"..cameraAtual.." criada!", Duration = 3})
+    end
+})
+
+SectionCriacaoCameras:CreateButton({
+    Name = "🔁 Trocar Câmera",
+    Callback = function()
+        if not scriptAtivo then return end
+        if #cameras <= 1 then return end
+        cameraAtual += 1
+        if cameraAtual > #cameras then cameraAtual = 1 end
+        if vendoCamera then cam.CameraSubject = cameras[cameraAtual] end
+        Rayfield:Notify({Title = "Câmera Trocada", Content = "Câmera #"..cameraAtual, Duration = 2})
+    end
+})
+
+SectionCriacaoCameras:CreateButton({
+    Name = "🗑️ Deletar Câmera Atual",
+    Callback = function()
+        if not scriptAtivo then return end
+        if #cameras == 0 then return end
+        local cameraPart = cameras[cameraAtual]
+        if cameraPart and cameraPart.Parent then cameraPart.Parent:Destroy() end
+        table.remove(cameras, cameraAtual)
+        if cameraAtual > #cameras then cameraAtual = math.max(1, #cameras) end
+        if #cameras == 0 then
+            vendoCamera = false
+            cam.CameraType = Enum.CameraType.Custom
+            local char = player.Character
+            if char then
+                local humanoid = char:FindFirstChildOfClass("Humanoid")
+                if humanoid then cam.CameraSubject = humanoid end
+            end
+        end
+        Rayfield:Notify({Title = "Câmera Deletada", Content = "Câmera removida com sucesso", Duration = 2})
+    end
+})
+
+-- ==================== ABA Visão das Câmeras ====================
+SectionCameras:CreateToggle({
+    Name = "👁️ Ver pela Câmera",
+    CurrentValue = false,
+    Callback = function(value)
+        if not scriptAtivo then return end
+        if #cameras == 0 then
+            Rayfield:Notify({Title = "Aviso", Content = "Nenhuma câmera criada", Duration = 3})
+            return
+        end
+        vendoCamera = value
+        if vendoCamera then
+            cam.CameraType = Enum.CameraType.Custom
+            cam.CameraSubject = cameras[cameraAtual]
+            melhorarVisaoCamera()
+        else
+            cam.CameraType = Enum.CameraType.Custom
+            local char = player.Character
+            if char then
+                local humanoid = char:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    cam.CameraSubject = humanoid
+                end
+            end
+        end
+    end
+})
+
+SectionCameras:CreateButton({
+    Name = "🔧 Melhorar Visão da Câmera",
+    Callback = function()
+        if not scriptAtivo then return end
+        melhorarVisaoCamera()
+        Rayfield:Notify({Title = "Visão Otimizada", Content = "Câmera ajustada para longas distâncias", Duration = 2})
+    end
+})
+
+-- ==================== ABA Movimento ====================
+SectionMovimento:CreateToggle({
+    Name = "⚡ Ativar Speed",
+    CurrentValue = false,
+    Callback = function(value)
+        if not scriptAtivo then return end
+        speedAtivo = value
+        local char = player.Character
+        if char then
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if humanoid then humanoid.WalkSpeed = speedAtivo and speedValor or 16 end
+        end
+    end
+})
+
+SectionMovimento:CreateSlider({
+    Name = "Velocidade",
+    Range = {16,100},
+    Increment = 1,
+    Suffix = "Studs",
+    CurrentValue = 16,
+    Callback = function(val)
+        if not scriptAtivo then return end
+        speedValor = val
+        if speedAtivo then
+            local char = player.Character
+            if char then
+                local humanoid = char:FindFirstChildOfClass("Humanoid")
+                if humanoid then humanoid.WalkSpeed = speedValor end
+            end
+        end
+    end
+})
+
+-- ==================== ABA Portais ====================
+SectionPortais:CreateLabel("🎯 SELEÇÃO DE PORTAIS")
+
+local inputSelecionarPortais = SectionPortais:CreateInput({
+    Name = "Selecionar Portais (ex: 1,2,3 ou 1-5)",
+    PlaceholderText = "Digite os números",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(texto)
+        if not scriptAtivo then return end
+        portaisSelecionados = processarNumeros(texto)
+        if #portaisSelecionados > 0 then
+            Rayfield:Notify({Title = "Portais Selecionados", Content = #portaisSelecionados .. " portal(is) selecionado(s)!", Duration = 2})
+        end
+    end
+})
+
+SectionPortais:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
+SectionPortais:CreateLabel("🔧 EDITAR PORTAIS SELECIONADOS")
+
+SectionPortais:CreateSlider({
+    Name = "⬆️ Altura (Selecionados)",
+    Range = {-10, 20},
+    Increment = 0.5,
+    Suffix = " studs",
+    CurrentValue = 0,
+    Callback = function(val)
+        if not scriptAtivo then return end
+        if #portaisSelecionados == 0 then
+            Rayfield:Notify({Title = "Aviso", Content = "Selecione portais primeiro!", Duration = 2})
+            return
+        end
+        atualizarAlturaPortaisSelecionados(val - alturaPortalClique)
+        alturaPortalClique = val
+    end
+})
+
+SectionPortais:CreateSlider({
+    Name = "📏 Tamanho (Selecionados)",
+    Range = {2, 20},
+    Increment = 0.5,
+    Suffix = " studs",
+    CurrentValue = 6,
+    Callback = function(val)
+        if not scriptAtivo then return end
+        if #portaisSelecionados == 0 then
+            Rayfield:Notify({Title = "Aviso", Content = "Selecione portais primeiro!", Duration = 2})
+            return
+        end
+        tamanhoPortal = val
+        atualizarTamanhoPortaisSelecionados(val)
+    end
+})
+
+SectionPortais:CreateSlider({
+    Name = "👻 Transparência (Selecionados)",
+    Range = {0, 1},
+    Increment = 0.05,
+    Suffix = "",
+    CurrentValue = 0.3,
+    Callback = function(val)
+        if not scriptAtivo then return end
+        if #portaisSelecionados == 0 then
+            Rayfield:Notify({Title = "Aviso", Content = "Selecione portais primeiro!", Duration = 2})
+            return
+        end
+        transparenciaPortal = val
+        atualizarTransparenciaPortaisSelecionados(val)
+    end
+})
+
+SectionPortais:CreateSlider({
+    Name = "🔄 Rotação (Selecionados)",
+    Range = {0, 360},
+    Increment = 5,
+    Suffix = "°",
+    CurrentValue = 0,
+    Callback = function(val)
+        if not scriptAtivo then return end
+        if #portaisSelecionados == 0 then
+            Rayfield:Notify({Title = "Aviso", Content = "Selecione portais primeiro!", Duration = 2})
+            return
+        end
+        rotacaoPortal = val
+        atualizarRotacaoPortaisSelecionados(val)
+    end
+})
+
+SectionPortais:CreateSlider({
+    Name = "📍 Distância de Aparição",
+    Range = {1, 15},
+    Increment = 0.5,
+    Suffix = " studs",
+    CurrentValue = 3,
+    Callback = function(val)
+        if not scriptAtivo then return end
+        distanciaAparicao = val
+        Rayfield:Notify({Title = "Distância Ajustada", Content = "Aparecerá a " .. val .. " studs", Duration = 1.5})
+    end
+})
+
+SectionPortais:CreateDropdown({
+    Name = "🧭 Lado de Aparição",
+    Options = {"Frente", "Trás", "Esquerda", "Direita", "Cima", "Baixo"},
+    CurrentOption = {"Frente"},
+    MultipleOptions = false,
+    Callback = function(option)
+        if not scriptAtivo then return end
+        ladoAparicao = option[1]
+        Rayfield:Notify({Title = "Lado Alterado", Content = "Aparição: " .. ladoAparicao, Duration = 2})
+    end
+})
+
+SectionPortais:CreateSlider({
+    Name = "⏱️ Cooldown de Teleporte",
+    Range = {0, 10},
+    Increment = 0.5,
+    Suffix = " seg",
+    CurrentValue = 1,
+    Callback = function(val)
+        if not scriptAtivo then return end
+        tempoTeleporteCooldown = val
+        Rayfield:Notify({Title = "Cooldown Ajustado", Content = val .. " segundos entre teleportes", Duration = 1.5})
+    end
+})
+
+SectionPortais:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
+SectionPortais:CreateLabel("➕ CRIAR NOVOS PORTAIS")
+
+SectionPortais:CreateToggle({
+    Name = "🎯 Portal na Frente (4 studs)",
+    CurrentValue = false,
+    Callback = function(value)
+        if not scriptAtivo then return end
+        portalAtivo = value
+        if value then modoClique = false end
+    end
+})
+
+SectionPortais:CreateToggle({
+    Name = "🖱️ Portal no Clique",
+    CurrentValue = false,
+    Callback = function(value)
+        if not scriptAtivo then return end
+        modoClique = value
+        if value then portalAtivo = false end
+    end
+})
+
+SectionPortais:CreateSlider({
+    Name = "⬆️ Altura do Portal (Modo Clique)",
+    Range = {0, 20},
+    Increment = 0.5,
+    Suffix = " studs",
+    CurrentValue = 3,
+    Callback = function(val)
+        if not scriptAtivo then return end
+        alturaPortalClique = val
+        Rayfield:Notify({Title = "Altura Ajustada", Content = "Portal será criado a " .. val .. " studs do chão", Duration = 1.5})
+    end
+})
+
+SectionPortais:CreateDropdown({
+    Name = "🔷 Formato do Portal",
+    Options = {"Cilindro", "Esfera", "Retângulo", "Quadrado", "Triângulo"},
+    CurrentOption = {"Cilindro"},
+    MultipleOptions = false,
+    Callback = function(option)
+        if not scriptAtivo then return end
+        formatoPortal = option[1]
+        Rayfield:Notify({Title = "Formato Alterado", Content = "Portal: " .. formatoPortal, Duration = 2})
+    end
+})
+
+SectionPortais:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
+SectionPortais:CreateLabel("🗑️ DELETAR PORTAIS")
+
+local inputDeletarPortais = SectionPortais:CreateInput({
+    Name = "Digite os números (ex: 1,2,3,5)",
+    PlaceholderText = "1,2,3 ou 1-5",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(texto) end
+})
+
+SectionPortais:CreateButton({
+    Name = "🗑️ DELETAR Portais Selecionados",
+    Callback = function()
+        if not scriptAtivo then return end
+        local texto = inputDeletarPortais.CurrentValue or ""
+        if texto == "" then
+            Rayfield:Notify({Title = "Erro", Content = "Digite os números dos portais!", Duration = 3})
+            return
+        end
+        local portaisDeletados = 0
+        local numerosParaDeletar = processarNumeros(texto)
+        for _, num in ipairs(numerosParaDeletar) do
+            if portaisAtivos[num] then
+                portaisAtivos[num]:Destroy()
+                portaisAtivos[num] = nil
+                liberarNumero(num)
+                portaisDeletados = portaisDeletados + 1
+            end
+        end
+        if portaisDeletados > 0 then
+            Rayfield:Notify({Title = "Portais Deletados", Content = portaisDeletados .. " portal(is) removido(s)!", Duration = 3})
+        else
+            Rayfield:Notify({Title = "Aviso", Content = "Nenhum portal encontrado", Duration = 3})
+        end
+    end
+})
+
+SectionPortais:CreateButton({
+    Name = "🗑️ DELETAR Todos os Portais",
+    Callback = function()
+        if not scriptAtivo then return end
+        for numero, portal in pairs(portaisAtivos) do portal:Destroy() end
+        portaisAtivos = {}
+        paresPortais = {}
+        numerosDisponiveis = {}
+        maiorNumero = 0
+        teleportCooldown = {}
+        portaisSelecionados = {}
+        Rayfield:Notify({Title = "Portais", Content = "Todos os portais deletados!", Duration = 3})
+    end
+})
+
+SectionPortais:CreateLabel("Info: 1↔2 | 3↔4 | 5↔6 | 7↔8...")
+
+-- ==================== ABA Criação de Placas ====================
+SectionPlacas:CreateLabel("📋 SISTEMA DE PLACAS")
+SectionPlacas:CreateLabel("Clique no chão para criar uma placa COM SUPORTE")
+
+local criarPlacaAtivo = false
+
+SectionPlacas:CreateToggle({
+    Name = "🖱️ Ativar Criação de Placas (Clique no chão)",
+    CurrentValue = false,
+    Callback = function(value)
+        if not scriptAtivo then return end
+        criarPlacaAtivo = value
+        if value then
+            Rayfield:Notify({Title = "Modo Placa Ativado", Content = "Clique no chão para criar placas COM SUPORTE", Duration = 2})
+        else
+            Rayfield:Notify({Title = "Modo Placa Desativado", Content = "Clique não cria mais placas", Duration = 2})
+        end
+    end
+})
+
+SectionPlacas:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
+SectionPlacas:CreateLabel("🎯 SELECIONAR PLACA")
+
+local inputSelecionarPlaca = SectionPlacas:CreateInput({
+    Name = "Digite o número da placa",
+    PlaceholderText = "Ex: 1, 2, 3...",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(texto)
+        if not scriptAtivo then return end
+        local numero = tonumber(texto)
+        if numero and placas[numero] then
+            placaSelecionadaParaEdicao = numero
+            Rayfield:Notify({Title = "Placa Selecionada", Content = "Placa #" .. numero .. " selecionada", Duration = 2})
+        elseif numero then
+            Rayfield:Notify({Title = "Erro", Content = "Placa #" .. numero .. " não encontrada", Duration = 2})
+        end
+    end
+})
+
+SectionPlacas:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
+SectionPlacas:CreateLabel("🎨 CORES PARA PLACA SELECIONADA")
+
+-- Botões de cores para placa selecionada
+for corNome, corValor in pairs(coresPlacas) do
+    SectionPlacas:CreateButton({
+        Name = "🎨 " .. corNome,
+        Callback = function()
+            if not scriptAtivo then return end
+            if placaSelecionadaParaEdicao then
+                mudarCorPlaca(placaSelecionadaParaEdicao, corValor)
+            else
+                Rayfield:Notify({Title = "Erro", Content = "Selecione uma placa primeiro!", Duration = 2})
+            end
+        end
+    })
+end
+
+SectionPlacas:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
+SectionPlacas:CreateLabel("✏️ EDITAR TEXTO DA PLACA")
+
+local inputNovoTexto = SectionPlacas:CreateInput({
+    Name = "Digite o novo texto",
+    PlaceholderText = "Digite o texto para a placa",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(texto) end
+})
+
+SectionPlacas:CreateButton({
+    Name = "📝 Aplicar Texto na Placa Selecionada",
+    Callback = function()
+        if not scriptAtivo then return end
+        local novoTexto = inputNovoTexto.CurrentValue
+        if placaSelecionadaParaEdicao and novoTexto and novoTexto ~= "" then
+            mudarTextoPlaca(placaSelecionadaParaEdicao, novoTexto)
+            inputNovoTexto:Set("")
+        elseif not placaSelecionadaParaEdicao then
+            Rayfield:Notify({Title = "Erro", Content = "Selecione uma placa primeiro!", Duration = 2})
+        elseif not novoTexto or novoTexto == "" then
+            Rayfield:Notify({Title = "Erro", Content = "Digite um texto!", Duration = 2})
+        end
+    end
+})
+
+SectionPlacas:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
+SectionPlacas:CreateLabel("🗑️ DELETAR PLACAS")
+
+local inputDeletarPlaca = SectionPlacas:CreateInput({
+    Name = "Digite o número da placa para deletar",
+    PlaceholderText = "Ex: 1, 2, 3...",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(texto) end
+})
+
+SectionPlacas:CreateButton({
+    Name = "🗑️ Deletar Placa Selecionada",
+    Callback = function()
+        if not scriptAtivo then return end
+        local texto = inputDeletarPlaca.CurrentValue
+        local numero = tonumber(texto)
+        if numero then
+            deletarPlaca(numero)
+            inputDeletarPlaca:Set("")
+            if placaSelecionadaParaEdicao == numero then
+                placaSelecionadaParaEdicao = nil
+            end
+        else
+            Rayfield:Notify({Title = "Erro", Content = "Digite um número válido!", Duration = 2})
+        end
+    end
+})
+
+SectionPlacas:CreateButton({
+    Name = "🗑️ Deletar TODAS as Placas",
+    Callback = function()
+        if not scriptAtivo then return end
+        limparTodasPlacas()
+        placaSelecionadaParaEdicao = nil
+    end
+})
+
+SectionPlacas:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
+SectionPlacas:CreateLabel("📊 INFORMAÇÕES")
+
+local placasInfoLabel = SectionPlacas:CreateLabel("Placas criadas: 0")
+
+-- Atualizar contador de placas
+spawn(function()
+    while scriptAtivo and task.wait(1) do
+        local count = 0
+        for _ in pairs(placas) do count = count + 1 end
+        placasInfoLabel:Set("Placas criadas: " .. count)
+    end
+end)
+
+-- ==================== ABA Extras ====================
+local SectionExtras = Window:CreateTab("⚙️ Extras", 4483362458)
+
+SectionExtras:CreateButton({
+    Name = "🔧 Diagnosticar e Corrigir Portais",
+    Callback = function()
+        if not scriptAtivo then return end
+        local corrigidos = 0
+        for num, portal in pairs(portaisAtivos) do
+            if not portal or not portal.Parent then
+                portaisAtivos[num] = nil
+                liberarNumero(num)
+                corrigidos = corrigidos + 1
+            else
+                local temZonaFrente = false
+                local temZonaTras = false
+                for _, child in ipairs(portal:GetChildren()) do
+                    if child.Name:match("Zona_") then
+                        if child.CFrame.Z > portal.CFrame.Z then temZonaFrente = true end
+                        if child.CFrame.Z < portal.CFrame.Z then temZonaTras = true end
+                    end
+                end
+                if not (temZonaFrente and temZonaTras) then
+                    for _, child in ipairs(portal:GetChildren()) do
+                        if child.Name:match("Zona_") then child:Destroy() end
+                    end
+                    local function criarZona(offsetZ)
+                        local zona = Instance.new("Part")
+                        zona.Name = "Zona_" .. num
+                        zona.Size = Vector3.new(tamanhoPortal + 1, tamanhoPortal + 3, 2)
+                        zona.Transparency = 1
+                        zona.CanCollide = false
+                        zona.Anchored = true
+                        zona.CFrame = portal.CFrame * CFrame.new(0, 0, offsetZ)
+                        zona.Parent = portal
+                        zona.Touched:Connect(function(hit)
+                            if not scriptAtivo then return end
+                            if hit.Parent and hit.Parent:FindFirstChild("Humanoid") then
+                                if hit.Parent.Name == player.Name then
+                                    local numeroPar = (num % 2 == 1) and num + 1 or num - 1
+                                    local portalDestino = portaisAtivos[numeroPar]
+                                    if portalDestino then teleportarJogador(portal, portalDestino) end
+                                end
+                            end
+                        end)
+                    end
+                    criarZona(3)
+                    criarZona(-3)
+                    corrigidos = corrigidos + 1
+                end
+            end
+        end
+        Rayfield:Notify({
+            Title = "Diagnóstico Concluído",
+            Content = corrigidos > 0 and ("Corrigidos " .. corrigidos .. " portal(is)") or "Nenhum problema encontrado",
+            Duration = 3
+        })
+    end
+})
+
+SectionExtras:CreateButton({
+    Name = "⛔ DESATIVAR SCRIPT COMPLETAMENTE",
+    Callback = function()
+        desativarScriptCompleto()
+    end
+})
+
+SectionExtras:CreateToggle({
+    Name = "🛡️ Proteção Anti-Ban (Simulação)",
+    CurrentValue = false,
+    Callback = function(value)
+        if value then
+            Rayfield:Notify({Title = "Proteção Ativada", Content = "Modo furtivo ativo (simulação)", Duration = 2})
+        else
+            Rayfield:Notify({Title = "Proteção Desativada", Content = "Modo normal", Duration = 2})
+        end
+    end
+})
+
+local antiLagAtivo = false
+local qualidadeOriginal = settings().Rendering.QualityLevel
+
+SectionExtras:CreateToggle({
+    Name = "⚡ Anti-Lag (Melhora desempenho)",
+    CurrentValue = false,
+    Callback = function(value)
+        if not scriptAtivo then return end
+        antiLagAtivo = value
+        if value then
+            qualidadeOriginal = settings().Rendering.QualityLevel
+            settings().Rendering.QualityLevel = 1
+            local lighting = game:GetService("Lighting")
+            lighting.GlobalShadows = false
+            lighting.FogEnd = 1e10
+            Rayfield:Notify({Title = "Anti-Lag Ativado", Content = "Qualidade reduzida para máximo desempenho", Duration = 2})
+        else
+            settings().Rendering.QualityLevel = qualidadeOriginal
+            local lighting = game:GetService("Lighting")
+            lighting.GlobalShadows = true
+            lighting.FogEnd = 100000
+            Rayfield:Notify({Title = "Anti-Lag Desativado", Content = "Qualidade restaurada", Duration = 2})
+        end
+    end
+})
+
+local nomeInput = SectionExtras:CreateInput({
+    Name = "✏️ Digite um nome para o script",
+    PlaceholderText = "Ex: Meu Hub",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(texto) end
+})
+
+SectionExtras:CreateButton({
+    Name = "✅ Aplicar Nome",
+    Callback = function()
+        if not scriptAtivo then return end
+        local novoNome = nomeInput.CurrentValue
+        if novoNome and novoNome ~= "" then
+            for _, gui in ipairs(player.PlayerGui:GetChildren()) do
+                if gui.Name == "Rayfield" then
+                    local function findTitleFrame(f)
+                        for _, child in ipairs(f:GetChildren()) do
+                            if child:IsA("TextLabel") and child.Text:find("Sistema Completo") then
+   
