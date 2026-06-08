@@ -1,3 +1,609 @@
+--[[
+    ╔══════════════════════════════════════════╗
+    ║         CÂMERA HUB  —  Visual Premium    ║
+    ║         Compatível com Delta X Android   ║
+    ╚══════════════════════════════════════════╝
+]]
+
+local TweenService = game:GetService("TweenService")
+local RunService   = game:GetService("RunService")
+
+-- ══════════════════════════════════════════════
+--  UTILIDADES
+-- ══════════════════════════════════════════════
+local function tween(obj, props, t, style, dir)
+    style = style or Enum.EasingStyle.Quad
+    dir   = dir   or Enum.EasingDirection.Out
+    TweenService:Create(obj, TweenInfo.new(t, style, dir), props):Play()
+end
+
+local function roundCorner(parent, radius)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, radius)
+    c.Parent = parent
+    return c
+end
+
+local function stroke(parent, color, thickness, transparency)
+    local s = Instance.new("UIStroke")
+    s.Color = color or Color3.fromRGB(255,255,255)
+    s.Thickness = thickness or 1.5
+    s.Transparency = transparency or 0
+    s.Parent = parent
+    return s
+end
+
+local function gradient(parent, c0, c1, rotation)
+    local g = Instance.new("UIGradient")
+    g.Color = ColorSequence.new(c0, c1)
+    g.Rotation = rotation or 0
+    g.Parent = parent
+    return g
+end
+
+local function label(parent, text, size, pos, color, font, zIndex)
+    local l = Instance.new("TextLabel")
+    l.Size = size
+    l.Position = pos
+    l.BackgroundTransparency = 1
+    l.Text = text
+    l.TextColor3 = color or Color3.fromRGB(255,255,255)
+    l.TextScaled = true
+    l.Font = font or Enum.Font.GothamBold
+    l.ZIndex = zIndex or 5
+    l.Parent = parent
+    return l
+end
+
+-- ══════════════════════════════════════════════
+--  ROOT GUI
+-- ══════════════════════════════════════════════
+local gui = Instance.new("ScreenGui")
+gui.Name  = "CameraHubGUI"
+gui.ResetOnSpawn = false
+gui.DisplayOrder = 999
+gui.Parent = game:GetService("CoreGui")
+
+-- ══════════════════════════════════════════════════════════════════
+--  ░░ TELA 1 — SPLASH SCREEN ░░
+-- ══════════════════════════════════════════════════════════════════
+local splash = Instance.new("Frame")
+splash.Size = UDim2.new(1, 0, 1, 0)
+splash.BackgroundColor3 = Color3.fromRGB(4, 6, 14)
+splash.BackgroundTransparency = 0.35
+splash.ZIndex = 10
+splash.Parent = gui
+gradient(splash,
+    Color3.fromRGB(4, 6, 20),
+    Color3.fromRGB(10, 14, 36),
+    135)
+
+for i = 1, 40 do
+    local star = Instance.new("Frame")
+    star.Size = UDim2.new(0, math.random(1,3), 0, math.random(1,3))
+    star.Position = UDim2.new(math.random()/1, 0, math.random()/1, 0)
+    star.BackgroundColor3 = Color3.fromRGB(
+        math.random(150,255),
+        math.random(150,255),
+        255)
+    star.BackgroundTransparency = math.random(50,75)/100
+    star.BorderSizePixel = 0
+    star.ZIndex = 11
+    roundCorner(star, 99)
+    star.Parent = splash
+end
+
+local lineTop = Instance.new("Frame")
+lineTop.Size = UDim2.new(0.7, 0, 0, 2)
+lineTop.Position = UDim2.new(0.15, 0, 0.18, 0)
+lineTop.BackgroundColor3 = Color3.fromRGB(60,140,255)
+lineTop.BorderSizePixel = 0
+lineTop.ZIndex = 12
+lineTop.BackgroundTransparency = 0.3
+roundCorner(lineTop, 99)
+lineTop.Parent = splash
+
+local lineBot = lineTop:Clone()
+lineBot.Position = UDim2.new(0.15, 0, 0.82, 0)
+lineBot.BackgroundColor3 = Color3.fromRGB(160, 80, 255)
+lineBot.Parent = splash
+
+local tagBoot = label(splash,
+    "◈  SYSTEM BOOT  ◈",
+    UDim2.new(0.6, 0, 0.06, 0),
+    UDim2.new(0.2, 0, 0.10, 0),
+    Color3.fromRGB(80, 160, 255),
+    Enum.Font.Gotham, 12)
+tagBoot.TextTransparency = 0.3
+
+local titleMain = label(splash,
+    "CÂMERA HUB",
+    UDim2.new(0.85, 0, 0.18, 0),
+    UDim2.new(0.075, 0, 0.28, 0),
+    Color3.fromRGB(255,255,255),
+    Enum.Font.GothamBold, 12)
+titleMain.TextStrokeTransparency = 0.7
+titleMain.TextStrokeColor3 = Color3.fromRGB(60,130,255)
+
+local titleGlow = label(splash,
+    "CÂMERA HUB",
+    UDim2.new(0.85, 0, 0.18, 0),
+    UDim2.new(0.075, 0, 0.28, 0),
+    Color3.fromRGB(80,160,255),
+    Enum.Font.GothamBold, 11)
+titleGlow.TextTransparency = 0.65
+
+local sep = Instance.new("Frame")
+sep.Size = UDim2.new(0.5, 0, 0, 1)
+sep.Position = UDim2.new(0.25, 0, 0.50, 0)
+sep.BackgroundColor3 = Color3.fromRGB(80,140,255)
+sep.BorderSizePixel = 0
+sep.BackgroundTransparency = 0.5
+sep.ZIndex = 12
+sep.Parent = splash
+
+local subTxt = label(splash,
+    ">_  initializing camera modules...",
+    UDim2.new(0.8, 0, 0.06, 0),
+    UDim2.new(0.1, 0, 0.54, 0),
+    Color3.fromRGB(100, 200, 120),
+    Enum.Font.Code, 12)
+
+local barBg = Instance.new("Frame")
+barBg.Size = UDim2.new(0.6, 0, 0, 6)
+barBg.Position = UDim2.new(0.2, 0, 0.68, 0)
+barBg.BackgroundColor3 = Color3.fromRGB(20,25,50)
+barBg.BorderSizePixel = 0
+barBg.ZIndex = 12
+roundCorner(barBg, 99)
+barBg.Parent = splash
+
+local barFill = Instance.new("Frame")
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(60,140,255)
+barFill.BorderSizePixel = 0
+barFill.ZIndex = 13
+roundCorner(barFill, 99)
+gradient(barFill, Color3.fromRGB(60,140,255), Color3.fromRGB(140,80,255), 0)
+barFill.Parent = barBg
+
+local counter = label(splash,
+    "5",
+    UDim2.new(0.14, 0, 0.10, 0),
+    UDim2.new(0.43, 0, 0.78, 0),
+    Color3.fromRGB(255,255,255),
+    Enum.Font.GothamBold, 12)
+
+local steps = 5
+for i = 1, steps do
+    counter.Text = tostring(steps - i + 1)
+    subTxt.TextTransparency = 0.3
+    wait(0.1)
+    subTxt.TextTransparency = 0
+    tween(barFill, {Size = UDim2.new(i/steps, 0, 1, 0)}, 0.85,
+        Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+    wait(1)
+end
+
+counter.Text = "✓"
+counter.TextColor3 = Color3.fromRGB(80, 220, 120)
+subTxt.Text = ">_  all systems online."
+wait(0.4)
+
+tween(splash, {BackgroundTransparency = 1}, 0.6)
+for _, c in ipairs(splash:GetDescendants()) do
+    if c:IsA("TextLabel") then
+        tween(c, {TextTransparency = 1}, 0.5)
+    elseif c:IsA("Frame") then
+        tween(c, {BackgroundTransparency = 1}, 0.5)
+    end
+end
+wait(0.65)
+splash:Destroy()
+
+-- ══════════════════════════════════════════════════════════════════
+--  ░░ TELA 2 — CÂMERA + PORTAL (5 segundos) ░░
+-- ══════════════════════════════════════════════════════════════════
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(1, 0, 1, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(5, 7, 18)
+mainFrame.BackgroundTransparency = 0.35
+mainFrame.ZIndex = 8
+mainFrame.Parent = gui
+gradient(mainFrame,
+    Color3.fromRGB(5, 7, 22),
+    Color3.fromRGB(12, 8, 28),
+    160)
+
+for i = 1, 50 do
+    local p = Instance.new("Frame")
+    p.Size = UDim2.new(0, math.random(1,2), 0, math.random(1,2))
+    p.Position = UDim2.new(math.random()/1, 0, math.random()/1, 0)
+    p.BackgroundColor3 = Color3.fromRGB(200,210,255)
+    p.BackgroundTransparency = math.random(50,75)/100
+    p.BorderSizePixel = 0
+    p.ZIndex = 9
+    roundCorner(p, 99)
+    p.Parent = mainFrame
+end
+
+local topTitle = label(mainFrame,
+    "◈  CÂMERA HUB",
+    UDim2.new(0.7, 0, 0.09, 0),
+    UDim2.new(0.15, 0, 0.03, 0),
+    Color3.fromRGB(255,255,255),
+    Enum.Font.GothamBold, 10)
+topTitle.TextXAlignment = Enum.TextXAlignment.Center
+
+local topSub = label(mainFrame,
+    "select a module below",
+    UDim2.new(0.6, 0, 0.05, 0),
+    UDim2.new(0.2, 0, 0.11, 0),
+    Color3.fromRGB(100,140,200),
+    Enum.Font.Gotham, 10)
+topSub.TextXAlignment = Enum.TextXAlignment.Center
+
+local tl = Instance.new("Frame")
+tl.Size = UDim2.new(0.8, 0, 0, 1)
+tl.Position = UDim2.new(0.1, 0, 0.165, 0)
+tl.BackgroundColor3 = Color3.fromRGB(60,100,200)
+tl.BackgroundTransparency = 0.6
+tl.BorderSizePixel = 0
+tl.ZIndex = 10
+roundCorner(tl, 99)
+tl.Parent = mainFrame
+
+-- ══════════════════════════════════
+--  CARD CÂMERA (esquerda)
+-- ══════════════════════════════════
+local camCard = Instance.new("Frame")
+camCard.Size = UDim2.new(0.42, 0, 0.68, 0)
+camCard.Position = UDim2.new(0.04, 0, 0.20, 0)
+camCard.BackgroundColor3 = Color3.fromRGB(12, 18, 40)
+camCard.ZIndex = 10
+roundCorner(camCard, 18)
+stroke(camCard, Color3.fromRGB(60, 130, 255), 1.5, 0.2)
+camCard.Parent = mainFrame
+gradient(camCard,
+    Color3.fromRGB(14, 22, 52),
+    Color3.fromRGB(8, 12, 28),
+    145)
+
+local camGlow = Instance.new("Frame")
+camGlow.Size = UDim2.new(0.9, 0, 0.06, 0)
+camGlow.Position = UDim2.new(0.05, 0, -0.01, 0)
+camGlow.BackgroundColor3 = Color3.fromRGB(60, 140, 255)
+camGlow.BackgroundTransparency = 0.5
+camGlow.BorderSizePixel = 0
+camGlow.ZIndex = 9
+roundCorner(camGlow, 99)
+camGlow.Parent = camCard
+
+local camBody = Instance.new("Frame")
+camBody.Size = UDim2.new(0.78, 0, 0.40, 0)
+camBody.Position = UDim2.new(0.11, 0, 0.18, 0)
+camBody.BackgroundColor3 = Color3.fromRGB(26, 30, 42)
+camBody.ZIndex = 11
+roundCorner(camBody, 10)
+stroke(camBody, Color3.fromRGB(80, 120, 200), 1.2, 0.1)
+camBody.Parent = camCard
+gradient(camBody, Color3.fromRGB(35, 42, 65), Color3.fromRGB(18, 22, 38), 120)
+
+local camRail = Instance.new("Frame")
+camRail.Size = UDim2.new(1, 0, 0.22, 0)
+camRail.Position = UDim2.new(0, 0, 0, 0)
+camRail.BackgroundColor3 = Color3.fromRGB(40, 50, 80)
+camRail.BorderSizePixel = 0
+camRail.ZIndex = 12
+roundCorner(camRail, 10)
+camRail.Parent = camBody
+
+local shutterBtn = Instance.new("Frame")
+shutterBtn.Size = UDim2.new(0.14, 0, 0.55, 0)
+shutterBtn.Position = UDim2.new(0.78, 0, 0.22, 0)
+shutterBtn.BackgroundColor3 = Color3.fromRGB(50, 80, 160)
+shutterBtn.ZIndex = 12
+roundCorner(shutterBtn, 6)
+shutterBtn.Parent = camBody
+
+local modeBtn = Instance.new("Frame")
+modeBtn.Size = UDim2.new(0.10, 0, 0.35, 0)
+modeBtn.Position = UDim2.new(0.63, 0, 0.30, 0)
+modeBtn.BackgroundColor3 = Color3.fromRGB(30, 40, 70)
+modeBtn.ZIndex = 12
+roundCorner(modeBtn, 4)
+modeBtn.Parent = camBody
+
+local flash = Instance.new("Frame")
+flash.Size = UDim2.new(0.08, 0, 0.22, 0)
+flash.Position = UDim2.new(0.08, 0, 0.08, 0)
+flash.BackgroundColor3 = Color3.fromRGB(255, 240, 120)
+flash.ZIndex = 13
+roundCorner(flash, 99)
+flash.Parent = camBody
+
+local lensMount = Instance.new("Frame")
+lensMount.Size = UDim2.new(0.50, 0, 0.85, 0)
+lensMount.Position = UDim2.new(0.16, 0, 0.07, 0)
+lensMount.BackgroundColor3 = Color3.fromRGB(15, 18, 30)
+lensMount.ZIndex = 12
+roundCorner(lensMount, 99)
+stroke(lensMount, Color3.fromRGB(80, 120, 200), 2, 0)
+lensMount.Parent = camBody
+
+local lensOuter = Instance.new("Frame")
+lensOuter.Size = UDim2.new(0.82, 0, 0.82, 0)
+lensOuter.Position = UDim2.new(0.09, 0, 0.09, 0)
+lensOuter.BackgroundColor3 = Color3.fromRGB(20, 25, 45)
+lensOuter.ZIndex = 13
+roundCorner(lensOuter, 99)
+stroke(lensOuter, Color3.fromRGB(60, 100, 180), 1.5, 0.2)
+lensOuter.Parent = lensMount
+
+local lensGlass = Instance.new("Frame")
+lensGlass.Size = UDim2.new(0.66, 0, 0.66, 0)
+lensGlass.Position = UDim2.new(0.17, 0, 0.17, 0)
+lensGlass.BackgroundColor3 = Color3.fromRGB(8, 16, 48)
+lensGlass.ZIndex = 14
+roundCorner(lensGlass, 99)
+lensGlass.Parent = lensOuter
+gradient(lensGlass,
+    Color3.fromRGB(20, 60, 180),
+    Color3.fromRGB(4, 10, 36),
+    135)
+
+local lensReflect1 = Instance.new("Frame")
+lensReflect1.Size = UDim2.new(0.35, 0, 0.35, 0)
+lensReflect1.Position = UDim2.new(0.10, 0, 0.10, 0)
+lensReflect1.BackgroundColor3 = Color3.fromRGB(160, 200, 255)
+lensReflect1.BackgroundTransparency = 0.4
+lensReflect1.BorderSizePixel = 0
+lensReflect1.ZIndex = 15
+roundCorner(lensReflect1, 99)
+lensReflect1.Parent = lensGlass
+
+local lensReflect2 = Instance.new("Frame")
+lensReflect2.Size = UDim2.new(0.15, 0, 0.15, 0)
+lensReflect2.Position = UDim2.new(0.60, 0, 0.60, 0)
+lensReflect2.BackgroundColor3 = Color3.fromRGB(200, 220, 255)
+lensReflect2.BackgroundTransparency = 0.55
+lensReflect2.BorderSizePixel = 0
+lensReflect2.ZIndex = 15
+roundCorner(lensReflect2, 99)
+lensReflect2.Parent = lensGlass
+
+local camStrap = Instance.new("Frame")
+camStrap.Size = UDim2.new(0.08, 0, 0.18, 0)
+camStrap.Position = UDim2.new(0.02, 0, 0.72, 0)
+camStrap.BackgroundColor3 = Color3.fromRGB(60, 80, 130)
+camStrap.ZIndex = 11
+roundCorner(camStrap, 4)
+camStrap.Parent = camCard
+
+local tripodBase = Instance.new("Frame")
+tripodBase.Size = UDim2.new(0.55, 0, 0.04, 0)
+tripodBase.Position = UDim2.new(0.22, 0, 0.90, 0)
+tripodBase.BackgroundColor3 = Color3.fromRGB(40, 50, 80)
+tripodBase.ZIndex = 11
+roundCorner(tripodBase, 4)
+tripodBase.Parent = camCard
+
+local tripodLeg1 = Instance.new("Frame")
+tripodLeg1.Size = UDim2.new(0.04, 0, 0.22, 0)
+tripodLeg1.Position = UDim2.new(0.24, 0, 0.70, 0)
+tripodLeg1.BackgroundColor3 = Color3.fromRGB(35, 45, 75)
+tripodLeg1.ZIndex = 10
+roundCorner(tripodLeg1, 2)
+tripodLeg1.Parent = camCard
+
+local tripodLeg2 = tripodLeg1:Clone()
+tripodLeg2.Position = UDim2.new(0.72, 0, 0.70, 0)
+tripodLeg2.Parent = camCard
+
+local tripodCenter = tripodLeg1:Clone()
+tripodCenter.Position = UDim2.new(0.48, 0, 0.58, 0)
+tripodCenter.Size = UDim2.new(0.04, 0, 0.32, 0)
+tripodCenter.Parent = camCard
+
+local camLabel = label(camCard,
+    "CÂMERA HUB",
+    UDim2.new(0.9, 0, 0.10, 0),
+    UDim2.new(0.05, 0, 0.87, 0),
+    Color3.fromRGB(80, 160, 255),
+    Enum.Font.GothamBold, 11)
+camLabel.TextXAlignment = Enum.TextXAlignment.Center
+camLabel.TextStrokeColor3 = Color3.fromRGB(0,20,80)
+camLabel.TextStrokeTransparency = 0.5
+
+local camSub = label(camCard,
+    "📷  camera module",
+    UDim2.new(0.9, 0, 0.07, 0),
+    UDim2.new(0.05, 0, 0.93, 0),
+    Color3.fromRGB(80, 120, 180),
+    Enum.Font.Gotham, 11)
+camSub.TextXAlignment = Enum.TextXAlignment.Center
+
+-- ══════════════════════════════════
+--  CARD PORTAL (direita)
+-- ══════════════════════════════════
+local portalCard = Instance.new("Frame")
+portalCard.Size = UDim2.new(0.42, 0, 0.68, 0)
+portalCard.Position = UDim2.new(0.54, 0, 0.20, 0)
+portalCard.BackgroundColor3 = Color3.fromRGB(18, 10, 36)
+portalCard.ZIndex = 10
+roundCorner(portalCard, 18)
+stroke(portalCard, Color3.fromRGB(160, 80, 255), 1.5, 0.2)
+portalCard.Parent = mainFrame
+gradient(portalCard,
+    Color3.fromRGB(22, 12, 48),
+    Color3.fromRGB(10, 6, 24),
+    145)
+
+local portalGlow = Instance.new("Frame")
+portalGlow.Size = UDim2.new(0.9, 0, 0.06, 0)
+portalGlow.Position = UDim2.new(0.05, 0, -0.01, 0)
+portalGlow.BackgroundColor3 = Color3.fromRGB(160, 80, 255)
+portalGlow.BackgroundTransparency = 0.5
+portalGlow.BorderSizePixel = 0
+portalGlow.ZIndex = 9
+roundCorner(portalGlow, 99)
+portalGlow.Parent = portalCard
+
+local portalOuter = Instance.new("Frame")
+portalOuter.Size = UDim2.new(0.68, 0, 0.68, 0)
+portalOuter.Position = UDim2.new(0.16, 0, 0.12, 0)
+portalOuter.BackgroundColor3 = Color3.fromRGB(90, 20, 180)
+portalOuter.ZIndex = 11
+roundCorner(portalOuter, 999)
+stroke(portalOuter, Color3.fromRGB(200, 100, 255), 2.5, 0)
+portalOuter.Parent = portalCard
+gradient(portalOuter,
+    Color3.fromRGB(140, 40, 255),
+    Color3.fromRGB(60, 10, 140),
+    135)
+
+local portalMid = Instance.new("Frame")
+portalMid.Size = UDim2.new(0.80, 0, 0.80, 0)
+portalMid.Position = UDim2.new(0.10, 0, 0.10, 0)
+portalMid.BackgroundColor3 = Color3.fromRGB(30, 8, 70)
+portalMid.ZIndex = 12
+roundCorner(portalMid, 999)
+stroke(portalMid, Color3.fromRGB(180, 90, 255), 2, 0.1)
+portalMid.Parent = portalOuter
+gradient(portalMid,
+    Color3.fromRGB(20, 6, 55),
+    Color3.fromRGB(60, 15, 120),
+    200)
+
+local portalInner = Instance.new("Frame")
+portalInner.Size = UDim2.new(0.72, 0, 0.72, 0)
+portalInner.Position = UDim2.new(0.14, 0, 0.14, 0)
+portalInner.BackgroundColor3 = Color3.fromRGB(200, 100, 255)
+portalInner.ZIndex = 13
+roundCorner(portalInner, 999)
+portalInner.Parent = portalMid
+gradient(portalInner,
+    Color3.fromRGB(240, 160, 255),
+    Color3.fromRGB(100, 30, 200),
+    180)
+
+local portalCore = Instance.new("Frame")
+portalCore.Size = UDim2.new(0.50, 0, 0.50, 0)
+portalCore.Position = UDim2.new(0.25, 0, 0.25, 0)
+portalCore.BackgroundColor3 = Color3.fromRGB(255, 220, 255)
+portalCore.ZIndex = 14
+roundCorner(portalCore, 999)
+portalCore.Parent = portalInner
+gradient(portalCore,
+    Color3.fromRGB(255, 255, 255),
+    Color3.fromRGB(220, 160, 255),
+    135)
+
+for i = 1, 6 do
+    local ray = Instance.new("Frame")
+    local ang = (i-1) * 60
+    local rx = 0.5 + math.cos(math.rad(ang)) * 0.48
+    local ry = 0.5 + math.sin(math.rad(ang)) * 0.48
+    ray.Size = UDim2.new(0.06, 0, 0.06, 0)
+    ray.Position = UDim2.new(rx - 0.03, 0, ry - 0.03, 0)
+    ray.BackgroundColor3 = Color3.fromRGB(200, 140, 255)
+    ray.BackgroundTransparency = 0.3
+    ray.BorderSizePixel = 0
+    ray.ZIndex = 12
+    roundCorner(ray, 99)
+    ray.Parent = portalOuter
+end
+
+for i = 1, 8 do
+    local particle = Instance.new("Frame")
+    local ang = (i-1) * 45
+    local px = 0.5 + math.cos(math.rad(ang)) * 0.56
+    local py = 0.5 + math.sin(math.rad(ang)) * 0.56
+    particle.Size = UDim2.new(0.04, 0, 0.04, 0)
+    particle.Position = UDim2.new(px - 0.02, 0, py - 0.02, 0)
+    particle.BackgroundColor3 = Color3.fromRGB(255, 180, 255)
+    particle.BackgroundTransparency = 0.5
+    particle.BorderSizePixel = 0
+    particle.ZIndex = 12
+    roundCorner(particle, 99)
+    particle.Parent = portalOuter
+end
+
+local portalLabel = label(portalCard,
+    "PORTAL HUB",
+    UDim2.new(0.9, 0, 0.10, 0),
+    UDim2.new(0.05, 0, 0.87, 0),
+    Color3.fromRGB(180, 100, 255),
+    Enum.Font.GothamBold, 11)
+portalLabel.TextXAlignment = Enum.TextXAlignment.Center
+portalLabel.TextStrokeColor3 = Color3.fromRGB(60, 0, 100)
+portalLabel.TextStrokeTransparency = 0.5
+
+local portalSub = label(portalCard,
+    "🌀  portal module",
+    UDim2.new(0.9, 0, 0.07, 0),
+    UDim2.new(0.05, 0, 0.93, 0),
+    Color3.fromRGB(140, 80, 200),
+    Enum.Font.Gotham, 11)
+portalSub.TextXAlignment = Enum.TextXAlignment.Center
+
+local footer = label(mainFrame,
+    "▸ tap to continue  •  delta x compatible",
+    UDim2.new(0.9, 0, 0.05, 0),
+    UDim2.new(0.05, 0, 0.92, 0),
+    Color3.fromRGB(60, 80, 130),
+    Enum.Font.Gotham, 9)
+footer.TextXAlignment = Enum.TextXAlignment.Center
+
+local startTime = tick()
+local camAngle    = 0
+local portalAngle = 0
+
+local conn = RunService.Heartbeat:Connect(function(dt)
+    local t = tick() - startTime
+    camAngle    = camAngle    + dt * 38
+    portalAngle = portalAngle + dt * 55
+
+    local camSwing = math.sin(math.rad(camAngle)) * 0.022
+    camBody.Position = UDim2.new(0.11 + camSwing, 0, 0.18, 0)
+    lensMount.Rotation = math.sin(t * 0.8) * 3
+
+    flash.BackgroundTransparency = 0.3 + math.abs(math.sin(t * 2.5)) * 0.5
+
+    portalOuter.Rotation = t * 28
+    portalMid.Rotation   = -(t * 18)
+    portalInner.Rotation = t * 45
+
+    local pulse = 0.85 + math.sin(t * 5) * 0.08
+    portalCore.Size = UDim2.new(0.50 * pulse, 0, 0.50 * pulse, 0)
+    portalCore.Position = UDim2.new(0.25 * (2 - pulse), 0, 0.25 * (2 - pulse), 0)
+
+    portalInner.BackgroundTransparency = 0.05 + math.abs(math.sin(t * 3)) * 0.15
+
+    camGlow.BackgroundTransparency    = 0.4 + math.abs(math.sin(t * 2))   * 0.4
+    portalGlow.BackgroundTransparency = 0.4 + math.abs(math.sin(t * 2.5)) * 0.4
+
+    local lb = math.abs(math.sin(t * 2.2))
+    camLabel.TextColor3    = Color3.fromRGB(60 + lb*40, 140 + lb*30, 255)
+    portalLabel.TextColor3 = Color3.fromRGB(160 + lb*40, 80 + lb*20, 255)
+end)
+
+wait(5)
+
+conn:Disconnect()
+
+tween(mainFrame, {BackgroundTransparency = 1}, 0.7, Enum.EasingStyle.Quart)
+for _, c in ipairs(mainFrame:GetDescendants()) do
+    if c:IsA("TextLabel") then
+        tween(c, {TextTransparency = 1}, 0.6)
+    elseif c:IsA("Frame") then
+        tween(c, {BackgroundTransparency = 1}, 0.6)
+    end
+end
+wait(0.75)
+
+gui:Destroy()
+print("✓ CÂMERA HUB — encerrado com sucesso.")
 --// RAYFIELD
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
@@ -21,10 +627,12 @@ local RunService = game:GetService("RunService")
 local TeleportService = game:GetService("TeleportService")
 local cam = workspace.CurrentCamera
 
---// VARIÁVEIS CÂMERAS
+--// VARIÁVEIS CÂMERAS (DO SCRIPT DE AVIÕES)
 local cameras = {}
 local cameraAtual = 1
 local vendoCamera = false
+local camerasSelecionadasDeletar = {}
+local tamanhoAtualCriacao = 1
 
 --// VARIÁVEIS PORTAIS
 local portalAtivo = false
@@ -34,7 +642,7 @@ local portaisAtivos = {}
 local paresPortais = {}
 local numerosDisponiveis = {}
 local maiorNumero = 0
-local teleportCooldown = {} -- AGORA USA TIMESTAMP
+local teleportCooldown = {}
 local mouse = player:GetMouse()
 
 --// VARIÁVEIS DE SELEÇÃO E EDIÇÃO
@@ -49,6 +657,7 @@ local ladoAparicao = "Frente"
 local transparenciaPortal = 0.3
 local rotacaoPortal = 0
 local distanciaDeteccaoPortal = 15
+local distanciaCriacaoPortal = 4
 
 --// VARIÁVEIS DE CONTROLE DO SCRIPT
 local scriptAtivado = true
@@ -85,262 +694,184 @@ local function liberarNumero(numero)
 	table.insert(numerosDisponiveis, numero)
 end
 
---// LABEL INFO CÂMERAS
-local infoLabel = SectionCameras:CreateLabel("Câmera: 0 / 0")
+--// ==================== PARTE DAS CÂMERAS (SCRIPT DE AVIÕES) ====================
 
+--// FUNÇÃO PARA OBTER REFERÊNCIA DO JOGADOR (COMPATÍVEL COM INVISIBLE FE)
+local function getPlayerReference()
+    -- Tenta obter o character normalmente
+    local char = player.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        return char
+    end
+    
+    -- Se não encontrou, procura em CharacterAppearance (usado por scripts de invisibilidade)
+    for _, child in ipairs(workspace:GetChildren()) do
+        if child:IsA("Model") and child.Name == player.Name then
+            if child:FindFirstChild("HumanoidRootPart") then
+                return child
+            end
+        end
+    end
+    
+    -- Tenta encontrar pelo Humanoid
+    for _, humanoid in ipairs(workspace:GetChildren()) do
+        if humanoid:IsA("Humanoid") and humanoid.Parent and humanoid.Parent.Name == player.Name then
+            if humanoid.Parent:FindFirstChild("HumanoidRootPart") then
+                return humanoid.Parent
+            end
+        end
+    end
+    
+    return nil
+end
+
+--// FUNÇÃO PARA ATUALIZAR SELECIONADOS NA LISTA
+local function atualizarListaSelecionados()
+	local texto = "📷 Câmeras Criadas: "
+	if #cameras == 0 then
+		texto = texto .. "Nenhuma"
+	else
+		local lista = {}
+		for i = 1, #cameras do
+			local selecionado = false
+			for _, s in ipairs(camerasSelecionadasDeletar) do
+				if s == i then selecionado = true break end
+			end
+			if selecionado then
+				table.insert(lista, "[" .. i .. "]✓")
+			else
+				table.insert(lista, i)
+			end
+		end
+		texto = texto .. table.concat(lista, ", ")
+	end
+	camerasCriadasLabel:Set(texto)
+end
+
+local infoLabel = SectionCameras:CreateLabel("Câmera: 0 / 0")
 local function atualizarInfo()
 	infoLabel:Set("Câmera: " .. cameraAtual .. " / " .. #cameras)
 end
 
---// IDENTIFICADOR DE CÂMERAS CRIADAS EM TEMPO REAL
 local camerasCriadasLabel = SectionCameras:CreateLabel("📷 Câmeras Criadas: Nenhuma")
 
-local function atualizarListaCameras()
-	local numeros = {}
-	for i = 1, #cameras do
-		table.insert(numeros, i)
-	end
-	if #numeros == 0 then
-		camerasCriadasLabel:Set("📷 Câmeras Criadas: Nenhuma")
+--// FUNÇÃO PROCESSAR SELEÇÃO DE MÚLTIPLAS CÂMERAS (COM ALL)
+local function processarSelecaoCameras(texto)
+	local selecionados = {}
+	local textoUpper = string.upper(texto)
+	
+	if textoUpper == "ALL" then
+		for i = 1, #cameras do
+			table.insert(selecionados, i)
+		end
 	else
-		camerasCriadasLabel:Set("📷 Câmeras Criadas: " .. table.concat(numeros, ", "))
+		for numero in string.gmatch(texto, "[^%s]+") do
+			local num = tonumber(numero)
+			if num and num >= 1 and num <= #cameras then
+				table.insert(selecionados, num)
+			end
+		end
 	end
+	
+	local unico = {}
+	for _, v in ipairs(selecionados) do
+		if not unico[v] then
+			unico[v] = true
+		end
+	end
+	
+	local resultado = {}
+	for k, _ in pairs(unico) do
+		table.insert(resultado, k)
+	end
+	table.sort(resultado)
+	
+	return resultado
 end
 
---// FUNÇÃO CRIAR CÂMERA (ALTERADA - MENOR, MODERNA E COM VISIBILIDADE CORRIGIDA)
-local function criarCameraRealista(position)
+--// FUNÇÃO PARA REDIMENSIONAR AVIÃO
+local function redimensionarAviao(cameraPart, novaEscala)
+	if not cameraPart or not cameraPart.Parent then return end
+	local model = cameraPart.Parent
+	if not model:IsA("Model") then return end
+	
+	local escalaAntiga = model:GetAttribute("Escala") or 1
+	local fator = novaEscala / escalaAntiga
+	
+	for _, parte in ipairs(model:GetChildren()) do
+		if parte:IsA("Part") then
+			parte.Size = parte.Size * fator
+			local posRelativa = parte.CFrame.Position - cameraPart.CFrame.Position
+			parte.CFrame = CFrame.new(cameraPart.CFrame.Position + (posRelativa * fator)) * (parte.CFrame - parte.CFrame.Position)
+		end
+	end
+	
+	model:SetAttribute("Escala", novaEscala)
+end
+
+--// FUNÇÃO CRIAR AVIÃO (COM TAMANHO ATUAL E CORRIGIDO PARA FICAR DE FRENTE)
+local function criarAviao(position, tamanho)
+	local escala = tamanho or 1
+	
 	local model = Instance.new("Model")
 	model.Name = "Camera3D"
 	model.Parent = workspace
 
-	-- CORPO PRINCIPAL (MENOR)
 	local corpo = Instance.new("Part")
-	corpo.Size = Vector3.new(1.2, 1.0, 1.1)
+	corpo.Size = Vector3.new(2 * escala, 0.8 * escala, 3 * escala)
 	corpo.Material = Enum.Material.SmoothPlastic
-	corpo.Color = Color3.fromRGB(20, 20, 25)
+	corpo.Color = Color3.fromRGB(245, 245, 245)
 	corpo.Anchored = true
 	corpo.CanCollide = false
-	corpo.CFrame = position
+	-- CORREÇÃO: Usar CFrame.new(position) para manter orientação neutra (virado para frente)
+	corpo.CFrame = CFrame.new(position)
 	corpo.Parent = model
 
-	-- TOPO ARREDONDADO
-	local topo = Instance.new("Part")
-	topo.Shape = Enum.PartType.Cylinder
-	topo.Size = Vector3.new(0.9, 0.4, 0.9)
-	topo.Material = Enum.Material.SmoothPlastic
-	topo.Color = Color3.fromRGB(35, 35, 40)
-	topo.Anchored = true
-	topo.CanCollide = false
-	topo.CFrame = corpo.CFrame * CFrame.new(0, 0.7, 0.15)
-	topo.Parent = model
+	local asa = Instance.new("Part")
+	asa.Size = Vector3.new(4 * escala, 0.2 * escala, 1.5 * escala)
+	asa.Material = Enum.Material.SmoothPlastic
+	asa.Color = Color3.fromRGB(245, 245, 245)
+	asa.Anchored = true
+	asa.CanCollide = false
+	asa.CFrame = corpo.CFrame * CFrame.new(0, 0.1 * escala, 0)
+	asa.Parent = model
 
-	-- LENTE PRINCIPAL
-	local lente = Instance.new("Part")
-	lente.Shape = Enum.PartType.Cylinder
-	lente.Size = Vector3.new(0.5, 1.0, 1.0)
-	lente.Material = Enum.Material.Glass
-	lente.Color = Color3.fromRGB(10, 10, 15)
-	lente.Transparency = 0.15
-	lente.Reflectance = 0.7
-	lente.Anchored = true
-	lente.CanCollide = false
-	lente.CFrame = corpo.CFrame * CFrame.new(0, -0.05, -0.9) * CFrame.Angles(0, 0, math.rad(90))
-	lente.Parent = model
+	local cauda = Instance.new("Part")
+	cauda.Size = Vector3.new(0.4 * escala, 1 * escala, 1.2 * escala)
+	cauda.Material = Enum.Material.SmoothPlastic
+	cauda.Color = Color3.fromRGB(245, 245, 245)
+	cauda.Anchored = true
+	cauda.CanCollide = false
+	cauda.CFrame = corpo.CFrame * CFrame.new(0, 0.6 * escala, -1.4 * escala)
+	cauda.Parent = model
 
-	-- ANEL DA LENTE
-	local anel = Instance.new("Part")
-	anel.Shape = Enum.PartType.Cylinder
-	anel.Size = Vector3.new(0.2, 1.1, 1.1)
-	anel.Material = Enum.Material.Metal
-	anel.Color = Color3.fromRGB(60, 60, 65)
-	anel.Reflectance = 0.5
-	anel.Anchored = true
-	anel.CanCollide = false
-	anel.CFrame = lente.CFrame * CFrame.new(0, 0, 0)
-	anel.Parent = model
+	local turbina = Instance.new("Part")
+	turbina.Shape = Enum.PartType.Cylinder
+	turbina.Size = Vector3.new(0.7 * escala, 0.7 * escala, 1 * escala)
+	turbina.Material = Enum.Material.Metal
+	turbina.Color = Color3.fromRGB(150, 150, 155)
+	turbina.Anchored = true
+	turbina.CanCollide = false
+	turbina.CFrame = asa.CFrame * CFrame.new(0, -0.2 * escala, 0.5 * escala)
+	turbina.Parent = model
 
-	-- LENTE INTERNA
-	local lenteInterna = Instance.new("Part")
-	lenteInterna.Shape = Enum.PartType.Cylinder
-	lenteInterna.Size = Vector3.new(0.3, 0.6, 0.6)
-	lenteInterna.Material = Enum.Material.Glass
-	lenteInterna.Color = Color3.fromRGB(30, 30, 80)
-	lenteInterna.Transparency = 0.4
-	lenteInterna.Reflectance = 0.8
-	lenteInterna.Anchored = true
-	lenteInterna.CanCollide = false
-	lenteInterna.CFrame = lente.CFrame * CFrame.new(0.15, 0, 0)
-	lenteInterna.Parent = model
+	local cockpit = Instance.new("Part")
+	cockpit.Shape = Enum.PartType.Cylinder
+	cockpit.Size = Vector3.new(1 * escala, 0.6 * escala, 1 * escala)
+	cockpit.Material = Enum.Material.Glass
+	cockpit.Color = Color3.fromRGB(100, 150, 200)
+	cockpit.Transparency = 0.3
+	cockpit.Anchored = true
+	cockpit.CanCollide = false
+	cockpit.CFrame = corpo.CFrame * CFrame.new(0, 0.2 * escala, 1.2 * escala)
+	cockpit.Parent = model
 
-	-- FLASH
-	local flash = Instance.new("Part")
-	flash.Shape = Enum.PartType.Ball
-	flash.Size = Vector3.new(0.2, 0.2, 0.2)
-	flash.Material = Enum.Material.Neon
-	flash.Color = Color3.fromRGB(255, 255, 220)
-	flash.Anchored = true
-	flash.CanCollide = false
-	flash.CFrame = topo.CFrame * CFrame.new(-0.35, 0.1, -0.3)
-	flash.Parent = model
-
-	-- LED DE GRAVAÇÃO
-	local ledGravacao = Instance.new("Part")
-	ledGravacao.Shape = Enum.PartType.Ball
-	ledGravacao.Size = Vector3.new(0.15, 0.15, 0.15)
-	ledGravacao.Material = Enum.Material.Neon
-	ledGravacao.Color = Color3.fromRGB(255, 0, 0)
-	ledGravacao.Anchored = true
-	ledGravacao.CanCollide = false
-	ledGravacao.CFrame = corpo.CFrame * CFrame.new(-0.5, 0.4, -0.45)
-	ledGravacao.Parent = model
-
-	local luzGravacao = Instance.new("PointLight")
-	luzGravacao.Brightness = 2
-	luzGravacao.Range = 4
-	luzGravacao.Color = Color3.fromRGB(255, 0, 0)
-	luzGravacao.Parent = ledGravacao
-
-	spawn(function()
-		while ledGravacao and ledGravacao.Parent do
-			ledGravacao.Transparency = 0
-			luzGravacao.Enabled = true
-			wait(0.8)
-			ledGravacao.Transparency = 0.6
-			luzGravacao.Enabled = false
-			wait(0.8)
-		end
-	end)
-
-	-- VISOR DIGITAL
-	local visor = Instance.new("Part")
-	visor.Size = Vector3.new(0.8, 0.6, 0.08)
-	visor.Material = Enum.Material.Neon
-	visor.Color = Color3.fromRGB(5, 5, 10)
-	visor.Anchored = true
-	visor.CanCollide = false
-	visor.CFrame = corpo.CFrame * CFrame.new(0, 0.15, 0.65)
-	visor.Parent = model
-
-	local surfaceGui = Instance.new("SurfaceGui")
-	surfaceGui.Face = Enum.NormalId.Front
-	surfaceGui.Parent = visor
-
-	local frame = Instance.new("Frame")
-	frame.Size = UDim2.new(1, 0, 1, 0)
-	frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-	frame.BorderSizePixel = 0
-	frame.Parent = surfaceGui
-
-	local textoRec = Instance.new("TextLabel")
-	textoRec.Size = UDim2.new(0.6, 0, 0.5, 0)
-	textoRec.Position = UDim2.new(0.2, 0, 0.25, 0)
-	textoRec.BackgroundTransparency = 1
-	textoRec.Text = "● REC"
-	textoRec.TextColor3 = Color3.fromRGB(255, 0, 0)
-	textoRec.TextScaled = true
-	textoRec.Font = Enum.Font.GothamBold
-	textoRec.Parent = frame
-
-	-- BASE DE SUPORTE
-	local base = Instance.new("Part")
-	base.Size = Vector3.new(1.4, 0.2, 1.3)
-	base.Material = Enum.Material.Metal
-	base.Color = Color3.fromRGB(40, 40, 45)
-	base.Reflectance = 0.3
-	base.Anchored = true
-	base.CanCollide = false
-	base.CFrame = corpo.CFrame * CFrame.new(0, -0.7, 0)
-	base.Parent = model
-
-	-- ANTENA
-	local antena = Instance.new("Part")
-	antena.Shape = Enum.PartType.Cylinder
-	antena.Size = Vector3.new(0.1, 0.6, 0.1)
-	antena.Material = Enum.Material.Metal
-	antena.Color = Color3.fromRGB(80, 80, 85)
-	antena.Anchored = true
-	antena.CanCollide = false
-	antena.CFrame = topo.CFrame * CFrame.new(0.4, 0.35, 0.1)
-	antena.Parent = model
-
-	local bolinhaAntena = Instance.new("Part")
-	bolinhaAntena.Shape = Enum.PartType.Ball
-	bolinhaAntena.Size = Vector3.new(0.12, 0.12, 0.12)
-	bolinhaAntena.Material = Enum.Material.Neon
-	bolinhaAntena.Color = Color3.fromRGB(0, 150, 255)
-	bolinhaAntena.Anchored = true
-	bolinhaAntena.CanCollide = false
-	bolinhaAntena.CFrame = antena.CFrame * CFrame.new(0, 0.35, 0)
-	bolinhaAntena.Parent = model
-
-	-- SISTEMA DE VISIBILIDADE (INVISÍVEL APENAS QUANDO OLHANDO PELA LENTE)
-	local cameraPart = corpo
-	local lastVisible = true
-
-	local function isLookingThroughLens()
-		if not player.Character then return false end
-		local playerHead = player.Character:FindFirstChild("Head")
-		if not playerHead then return false end
-
-		local cameraPos = cameraPart.Position
-		local playerHeadPos = playerHead.Position
-		local cameraForward = cameraPart.CFrame.LookVector
-		local playerToCamera = (cameraPos - playerHeadPos).Unit
-		local dotProduct = cameraForward:Dot(playerToCamera)
-		local isInFront = dotProduct < -0.7
-		local distance = (cameraPos - playerHeadPos).Magnitude
-		local isCloseEnough = distance < 10
-
-		return isInFront and isCloseEnough
-	end
-
-	local function updateVisibility()
-		local shouldBeVisible = not isLookingThroughLens()
-
-		if shouldBeVisible ~= lastVisible then
-			lastVisible = shouldBeVisible
-
-			for _, part in ipairs(model:GetChildren()) do
-				if part:IsA("BasePart") then
-					if shouldBeVisible then
-						part.Transparency = 0
-						if part == lente then part.Transparency = 0.15
-						elseif part == lenteInterna then part.Transparency = 0.4
-						elseif part == visor then part.Transparency = 0
-						elseif part == ledGravacao then part.Transparency = 0
-						else part.Transparency = 0
-						end
-					else
-						part.Transparency = 1
-					end
-				end
-			end
-
-			if shouldBeVisible then
-				surfaceGui.Enabled = true
-			else
-				surfaceGui.Enabled = false
-			end
-		end
-	end
-
-	spawn(function()
-		while model and model.Parent do
-			wait(0.1)
-			updateVisibility()
-		end
-	end)
-
-	RunService.RenderStepped:Connect(function()
-		if model and model.Parent then
-			updateVisibility()
-		end
-	end)
-
+	model:SetAttribute("Escala", escala)
 	model.PrimaryPart = corpo
 	return corpo
 end
 
+-- Função melhorada para CharacterAdded (compatível com INVISIBLE FE)
 player.CharacterAdded:Connect(function(char)
 	wait(0.5)
 	if vendoCamera and #cameras > 0 then
@@ -349,29 +880,72 @@ player.CharacterAdded:Connect(function(char)
 	end
 end)
 
+-- Também conecta ao evento AncestryChanged do workspace para detectar mudanças no personagem
+workspace.DescendantAdded:Connect(function(descendant)
+	if descendant:IsA("Humanoid") and descendant.Parent and descendant.Parent.Name == player.Name then
+		wait(0.5)
+		if vendoCamera and #cameras > 0 then
+			cam.CameraType = Enum.CameraType.Custom
+			cam.CameraSubject = cameras[cameraAtual]
+		end
+	end
+end)
+
+--// BOTÃO CRIAR AVIÃO (USANDO A FUNÇÃO COMPATÍVEL)
 SectionGuras:CreateButton({
-	Name = "📷 Criar Câmera Realista",
+	Name = "✈️ Criar Avião",
 	Callback = function()
-		local char = player.Character
-		if not char then return end
-		local head = char:FindFirstChild("Head")
-		if not head then return end
-		local cameraPart = criarCameraRealista(head.CFrame * CFrame.new(0, 3, -5))
+		local reference = getPlayerReference()
+		if not reference then 
+			Rayfield:Notify({Title = "Erro", Content = "Não foi possível localizar o personagem", Duration = 3})
+			return 
+		end
+		local head = reference:FindFirstChild("Head")
+		if not head then
+			-- Tenta encontrar a cabeça em outros lugares
+			for _, part in ipairs(reference:GetChildren()) do
+				if part:IsA("Part") and part.Name == "Head" then
+					head = part
+					break
+				end
+			end
+		end
+		if not head then
+			Rayfield:Notify({Title = "Erro", Content = "Cabeça não encontrada", Duration = 3})
+			return
+		end
+		-- CORREÇÃO: Usar CFrame.new na posição para manter orientação correta
+		local cameraPart = criarAviao(head.CFrame.Position + Vector3.new(0, 2.5, -4), tamanhoAtualCriacao)
 		table.insert(cameras, cameraPart)
 		cameraAtual = #cameras
 		atualizarInfo()
-		atualizarListaCameras()
-		Rayfield:Notify({Title = "✅ Câmera Criada", Content = "Câmera realista #" .. cameraAtual .. " criada!", Duration = 3})
+		atualizarListaSelecionados()
+		Rayfield:Notify({Title = "✅ Avião Criado", Content = "Avião #" .. cameraAtual .. " (tamanho " .. tamanhoAtualCriacao .. "x)", Duration = 3})
 	end
 })
 
---// SELECIONAR CÂMERA POR NÚMERO
 SectionCameras:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
 
+--// SLIDER PARA DEFINIR TAMANHO DAS PRÓXIMAS CRIAÇÕES
+local sliderTamanhoCriacao = SectionCameras:CreateSlider({
+	Name = "📏 Tamanho dos Próximos Aviões",
+	Range = {0.5, 3},
+	Increment = 0.05,
+	Suffix = "x",
+	CurrentValue = 1,
+	Callback = function(value)
+		tamanhoAtualCriacao = value
+	end
+})
+
+SectionCameras:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
+
+--// INPUT SELECIONAR AVIÃO PARA VER (TAMANHO GRANDE)
 local inputNumeroCamera = SectionCameras:CreateInput({
 	Name = "🔢 Digite o número da câmera",
 	PlaceholderText = "Ex: 1, 2, 3...",
 	RemoveTextAfterFocusLost = false,
+	Width = 300,
 	Callback = function(texto)
 		local num = tonumber(texto)
 		if num and num >= 1 and num <= #cameras then
@@ -387,6 +961,7 @@ local inputNumeroCamera = SectionCameras:CreateInput({
 	end
 })
 
+--// TOGGLE VISÃO
 local toggleVisaoCamera = SectionCameras:CreateToggle({
 	Name = "👁️ Ativar Visão da Câmera",
 	CurrentValue = false,
@@ -402,9 +977,9 @@ local toggleVisaoCamera = SectionCameras:CreateToggle({
 			cam.CameraSubject = cameras[cameraAtual]
 		else
 			cam.CameraType = Enum.CameraType.Custom
-			local char = player.Character
-			if char then
-				local humanoid = char:FindFirstChildOfClass("Humanoid")
+			local reference = getPlayerReference()
+			if reference then
+				local humanoid = reference:FindFirstChildOfClass("Humanoid")
 				if humanoid then
 					cam.CameraSubject = humanoid
 				end
@@ -413,144 +988,256 @@ local toggleVisaoCamera = SectionCameras:CreateToggle({
 	end
 })
 
---// TEXTO PERSONALIZADO NAS CÂMERAS (IGUAL AOS PORTAIS)
+SectionCameras:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
+
+--// INPUT SELECIONAR MÚLTIPLAS CÂMERAS PARA DELETAR (TAMANHO GRANDE)
+local inputSelecionarDeletar = SectionCameras:CreateInput({
+	Name = "🎯 Selecionar câmeras (ex: 1 2 3 ou ALL)",
+	PlaceholderText = "Digite: 1 2 3 4 5 ou ALL",
+	RemoveTextAfterFocusLost = false,
+	Width = 300,
+	Callback = function(texto)
+		if texto == "" then return end
+		camerasSelecionadasDeletar = processarSelecaoCameras(texto)
+		if #camerasSelecionadasDeletar > 0 then
+			local msg = ""
+			for i, num in ipairs(camerasSelecionadasDeletar) do
+				if i <= 5 then
+					msg = msg .. num .. " "
+				end
+			end
+			if #camerasSelecionadasDeletar > 5 then msg = msg .. "e mais " .. (#camerasSelecionadasDeletar - 5) .. "..." end
+			Rayfield:Notify({Title = "Câmeras Selecionadas", Content = #camerasSelecionadasDeletar .. " câmera(s): " .. msg, Duration = 2})
+		else
+			Rayfield:Notify({Title = "Aviso", Content = "Nenhuma câmera válida! Total: " .. #cameras, Duration = 2})
+		end
+		atualizarListaSelecionados()
+	end
+})
+
+--// SLIDER AJUSTAR TAMANHO DAS CÂMERAS SELECIONADAS
+local sliderTamanhoMultiplo = SectionCameras:CreateSlider({
+	Name = "📏 Ajustar Tamanho das Câmeras Selecionadas",
+	Range = {0.5, 3},
+	Increment = 0.05,
+	Suffix = "x",
+	CurrentValue = 1,
+	Callback = function(value)
+		if #camerasSelecionadasDeletar == 0 then
+			return
+		end
+		for _, num in ipairs(camerasSelecionadasDeletar) do
+			if cameras[num] then
+				redimensionarAviao(cameras[num], value)
+			end
+		end
+		Rayfield:Notify({Title = "📏 Tamanho Ajustado", Content = "Para " .. #camerasSelecionadasDeletar .. " câmera(s): " .. value .. "x", Duration = 1})
+	end
+})
+
+--// BOTÃO DELETAR CÂMERAS SELECIONADAS
+SectionCameras:CreateButton({
+	Name = "🗑️ DELETAR Câmeras Selecionadas",
+	Callback = function()
+		if #camerasSelecionadasDeletar == 0 then
+			Rayfield:Notify({Title = "Aviso", Content = "Selecione as câmeras primeiro!", Duration = 2})
+			return
+		end
+		
+		local removidos = {}
+		table.sort(camerasSelecionadasDeletar, function(a,b) return a > b end)
+		
+		for _, num in ipairs(camerasSelecionadasDeletar) do
+			if cameras[num] and cameras[num].Parent then
+				table.insert(removidos, num)
+				cameras[num].Parent:Destroy()
+				table.remove(cameras, num)
+			end
+		end
+		
+		if cameraAtual > #cameras then cameraAtual = math.max(1, #cameras) end
+		camerasSelecionadasDeletar = {}
+		
+		if vendoCamera then
+			if #cameras > 0 then
+				cam.CameraSubject = cameras[cameraAtual]
+			else
+				vendoCamera = false
+				toggleVisaoCamera:Set(false)
+				cam.CameraType = Enum.CameraType.Custom
+				local reference = getPlayerReference()
+				if reference then
+					local humanoid = reference:FindFirstChildOfClass("Humanoid")
+					if humanoid then cam.CameraSubject = humanoid end
+				end
+			end
+		end
+		
+		atualizarInfo()
+		atualizarListaSelecionados()
+		Rayfield:Notify({Title = "🗑️ Câmeras Deletadas", Content = #removidos .. " câmera(s) removida(s)!", Duration = 2})
+	end
+})
+
+--// BOTÃO DELETAR CÂMERA ATUAL
+SectionCameras:CreateButton({
+	Name = "🗑️ Deletar Câmera Atual",
+	Callback = function()
+		if #cameras == 0 then return end
+		local numDeletado = cameraAtual
+		local cameraPart = cameras[cameraAtual]
+		if cameraPart and cameraPart.Parent then cameraPart.Parent:Destroy() end
+		table.remove(cameras, cameraAtual)
+		if cameraAtual > #cameras then cameraAtual = math.max(1, #cameras) end
+		atualizarInfo()
+		atualizarListaSelecionados()
+		if #cameras == 0 then
+			vendoCamera = false
+			toggleVisaoCamera:Set(false)
+			cam.CameraType = Enum.CameraType.Custom
+			local reference = getPlayerReference()
+			if reference then
+				local humanoid = reference:FindFirstChildOfClass("Humanoid")
+				if humanoid then cam.CameraSubject = humanoid end
+			end
+		end
+		Rayfield:Notify({Title = "Avião Deletado", Content = "Avião #" .. numDeletado .. " removido", Duration = 2})
+	end
+})
+
 SectionCameras:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
 SectionCameras:CreateLabel("📝 TEXTO PERSONALIZADO")
 
--- Input para digitar o texto
+--// INPUT TEXTO PARA CÂMERA (TAMANHO GRANDE)
 local inputTextoCamera = SectionCameras:CreateInput({
 	Name = "✏️ Digite o texto para a câmera",
 	PlaceholderText = "Ex: Câmera Principal, Entrada...",
 	RemoveTextAfterFocusLost = false,
+	Width = 300,
 	Callback = function(texto) end
 })
 
--- Variável para armazenar as câmeras selecionadas para texto
 local camerasSelecionadasParaTexto = {}
 
--- Função para processar números das câmeras
+--// FUNÇÃO PARA PROCESSAR TEXTO (COM SUPORTE A ALL)
 local function processarNumerosCamera(texto)
-	local numeros = {}
-	for parte in string.gmatch(texto, "[^,]+") do
-		parte = parte:match("^%s*(.-)%s*$")
-		if string.find(parte, "-") then
-			local inicio, fim = string.match(parte, "(%d+)%-(%d+)")
-			if inicio and fim then
-				inicio, fim = tonumber(inicio), tonumber(fim)
-				for i = inicio, fim do 
-					if i >= 1 and i <= #cameras then
-						table.insert(numeros, i) 
+	local selecionados = {}
+	local textoUpper = string.upper(texto)
+	
+	if textoUpper == "ALL" then
+		for i = 1, #cameras do
+			table.insert(selecionados, i)
+		end
+	else
+		for parte in string.gmatch(texto, "[^,%s]+") do
+			parte = parte:match("^%s*(.-)%s*$")
+			if string.find(parte, "-") then
+				local inicio, fim = string.match(parte, "(%d+)%-(%d+)")
+				if inicio and fim then
+					inicio, fim = tonumber(inicio), tonumber(fim)
+					for i = inicio, fim do 
+						if i >= 1 and i <= #cameras then
+							table.insert(selecionados, i) 
+						end
 					end
 				end
-			end
-		else
-			local num = tonumber(parte)
-			if num and num >= 1 and num <= #cameras then 
-				table.insert(numeros, num) 
+			else
+				local num = tonumber(parte)
+				if num and num >= 1 and num <= #cameras then 
+					table.insert(selecionados, num) 
+				end
 			end
 		end
 	end
-	return numeros
+	
+	local unico = {}
+	for _, v in ipairs(selecionados) do
+		if not unico[v] then
+			unico[v] = true
+		end
+	end
+	
+	local resultado = {}
+	for k, _ in pairs(unico) do
+		table.insert(resultado, k)
+	end
+	table.sort(resultado)
+	
+	return resultado
 end
 
--- Input para selecionar quais câmeras vão receber o texto
+--// INPUT SELECIONAR CÂMERAS PARA TEXTO (TAMANHO GRANDE)
 local inputSelecionarCamerasTexto = SectionCameras:CreateInput({
-	Name = "🎯 Selecionar Câmeras (ex: 1,2,3 ou 1-5)",
-	PlaceholderText = "Digite os números das câmeras",
+	Name = "🎯 Selecionar Câmeras para texto (ex: 1 2 3 ou 1-5 ou ALL)",
+	PlaceholderText = "Digite: 1 2 3 ou 1-5 ou ALL",
 	RemoveTextAfterFocusLost = false,
+	Width = 300,
 	Callback = function(texto)
+		if texto == "" then return end
 		camerasSelecionadasParaTexto = processarNumerosCamera(texto)
 		if #camerasSelecionadasParaTexto > 0 then
-			Rayfield:Notify({
-				Title = "Câmeras Selecionadas", 
-				Content = #camerasSelecionadasParaTexto .. " câmera(s) selecionada(s) para texto!", 
-				Duration = 2
-			})
+			local msg = ""
+			for i, num in ipairs(camerasSelecionadasParaTexto) do
+				if i <= 5 then
+					msg = msg .. num .. " "
+				end
+			end
+			if #camerasSelecionadasParaTexto > 5 then msg = msg .. "e mais " .. (#camerasSelecionadasParaTexto - 5) .. "..." end
+			Rayfield:Notify({Title = "Câmeras Selecionadas", Content = #camerasSelecionadasParaTexto .. " câmera(s): " .. msg, Duration = 2})
 		else
-			Rayfield:Notify({
-				Title = "Aviso", 
-				Content = "Nenhuma câmera válida selecionada! Total: " .. #cameras, 
-				Duration = 2
-			})
+			Rayfield:Notify({Title = "Aviso", Content = "Nenhuma câmera válida! Total: " .. #cameras, Duration = 2})
 		end
 	end
 })
 
--- Tabela para guardar os billboards ativos das câmeras
 local textosCamerasAtivos = {}
 
--- Botão para aplicar o texto nas câmeras selecionadas
 SectionCameras:CreateButton({
 	Name = "📌 APLICAR TEXTO nas Câmeras Selecionadas",
 	Callback = function()
 		local texto = inputTextoCamera.CurrentValue or ""
-		
 		if #camerasSelecionadasParaTexto == 0 then
-			Rayfield:Notify({
-				Title = "Aviso", 
-				Content = "Selecione as câmeras primeiro!", 
-				Duration = 2
-			})
+			Rayfield:Notify({Title = "Aviso", Content = "Selecione as câmeras primeiro! Use 1 2 3 ou ALL", Duration = 3})
 			return
 		end
-		
 		if texto == "" then
-			Rayfield:Notify({
-				Title = "Aviso", 
-				Content = "Digite um texto primeiro!", 
-				Duration = 2
-			})
+			Rayfield:Notify({Title = "Aviso", Content = "Digite um texto primeiro!", Duration = 2})
 			return
 		end
-		
-		-- Remove textos anteriores das cameras selecionadas
 		for _, numCamera in ipairs(camerasSelecionadasParaTexto) do
 			if textosCamerasAtivos[numCamera] then
 				textosCamerasAtivos[numCamera]:Destroy()
 				textosCamerasAtivos[numCamera] = nil
 			end
 		end
-		
-		-- Aplica o texto em cada câmera selecionada
 		for _, numCamera in ipairs(camerasSelecionadasParaTexto) do
 			local cameraPart = cameras[numCamera]
 			if cameraPart and cameraPart.Parent then
-				-- Procura BillboardGui existente
 				local billboard = cameraPart:FindFirstChild("BillboardGui")
 				if not billboard then
 					billboard = Instance.new("BillboardGui")
 					billboard.Size = UDim2.new(0, 200, 0, 50)
 					billboard.Adornee = cameraPart
 					billboard.AlwaysOnTop = true
-					billboard.StudsOffset = Vector3.new(0, 3, 0)
+					billboard.StudsOffset = Vector3.new(0, 2, 0)
 					billboard.Parent = cameraPart
 				end
-				
-				-- Limpa textos antigos
-				for _, child in ipairs(billboard:GetChildren()) do
-					child:Destroy()
-				end
-				
-				-- Container principal
+				for _, child in ipairs(billboard:GetChildren()) do child:Destroy() end
 				local container = Instance.new("Frame")
 				container.Size = UDim2.new(1, 0, 1, 0)
 				container.BackgroundTransparency = 1
 				container.Parent = billboard
-				
-				-- Número da câmera (em cima, menor)
 				local textoNumero = Instance.new("TextLabel")
 				textoNumero.Size = UDim2.new(1, 0, 0.4, 0)
 				textoNumero.Position = UDim2.new(0, 0, 0, 0)
 				textoNumero.BackgroundTransparency = 1
-				textoNumero.Text = "📷 #" .. numCamera
+				textoNumero.Text = "✈️ #" .. numCamera
 				textoNumero.Font = Enum.Font.GothamBold
 				textoNumero.TextSize = 16
 				textoNumero.TextColor3 = Color3.fromRGB(255, 255, 255)
 				textoNumero.TextStrokeTransparency = 0
 				textoNumero.TextStrokeColor3 = Color3.new(0, 0, 0)
 				textoNumero.Parent = container
-				
-				-- Texto personalizado (embaixo, maior)
 				local textoPersonalizado = Instance.new("TextLabel")
 				textoPersonalizado.Size = UDim2.new(1, 0, 0.6, 0)
 				textoPersonalizado.Position = UDim2.new(0, 0, 0.35, 0)
@@ -562,33 +1249,20 @@ SectionCameras:CreateButton({
 				textoPersonalizado.TextStrokeTransparency = 0.3
 				textoPersonalizado.TextStrokeColor3 = Color3.new(0, 0, 0)
 				textoPersonalizado.Parent = container
-				
-				-- Guarda referência
 				textosCamerasAtivos[numCamera] = billboard
 			end
 		end
-		
-		Rayfield:Notify({
-			Title = "Texto Aplicado", 
-			Content = "Texto adicionado em " .. #camerasSelecionadasParaTexto .. " câmera(s)!", 
-			Duration = 2
-		})
+		Rayfield:Notify({Title = "Texto Aplicado", Content = "Texto adicionado em " .. #camerasSelecionadasParaTexto .. " câmera(s)!", Duration = 2})
 	end
 })
 
--- Botão para remover o texto das câmeras selecionadas
 SectionCameras:CreateButton({
 	Name = "🗑️ REMOVER TEXTO das Câmeras Selecionadas",
 	Callback = function()
 		if #camerasSelecionadasParaTexto == 0 then
-			Rayfield:Notify({
-				Title = "Aviso", 
-				Content = "Selecione as câmeras primeiro!", 
-				Duration = 2
-			})
+			Rayfield:Notify({Title = "Aviso", Content = "Selecione as câmeras primeiro!", Duration = 2})
 			return
 		end
-		
 		local removidos = 0
 		for _, numCamera in ipairs(camerasSelecionadasParaTexto) do
 			if textosCamerasAtivos[numCamera] then
@@ -597,73 +1271,28 @@ SectionCameras:CreateButton({
 				removidos = removidos + 1
 			end
 		end
-		
-		Rayfield:Notify({
-			Title = "Textos Removidos", 
-			Content = removidos .. " texto(s) removido(s)!", 
-			Duration = 2
-		})
+		Rayfield:Notify({Title = "Textos Removidos", Content = removidos .. " texto(s) removido(s)!", Duration = 2})
 	end
 })
 
---// DELETAR CÂMERA ATUAL
-SectionCameras:CreateButton({
-	Name = "🗑️ Deletar Câmera Atual",
-	Callback = function()
-		if #cameras == 0 then return end
-		local numDeletado = cameraAtual
-		local cameraPart = cameras[cameraAtual]
-		if cameraPart and cameraPart.Parent then cameraPart.Parent:Destroy() end
-		
-		-- Remove texto se existir
-		if textosCamerasAtivos[numDeletado] then
-			textosCamerasAtivos[numDeletado]:Destroy()
-			textosCamerasAtivos[numDeletado] = nil
-		end
-		
-		-- Reorganiza a tabela de textos ativos
-		local novosTextos = {}
-		for num, billboard in pairs(textosCamerasAtivos) do
-			if num > numDeletado then
-				novosTextos[num - 1] = billboard
-			elseif num < numDeletado then
-				novosTextos[num] = billboard
-			end
-		end
-		textosCamerasAtivos = novosTextos
-		
-		table.remove(cameras, cameraAtual)
-		if cameraAtual > #cameras then cameraAtual = math.max(1, #cameras) end
-		atualizarInfo()
-		atualizarListaCameras()
-		if #cameras == 0 then
-			vendoCamera = false
-			toggleVisaoCamera:Set(false)
-			cam.CameraType = Enum.CameraType.Custom
-			local char = player.Character
-			if char then
-				local humanoid = char:FindFirstChildOfClass("Humanoid")
-				if humanoid then cam.CameraSubject = humanoid end
-			end
-		end
-		Rayfield:Notify({Title = "Câmera Deletada", Content = "Câmera #" .. numDeletado .. " removida", Duration = 2})
-	end
-})
+--// ==================== FIM DA PARTE DAS CÂMERAS ====================
 
---// FUNÇÃO TELEPORTE (CORRIGIDA - USANDO TIMESTAMP)
+--// ==================== PARTE DOS PORTAIS ====================
+
+--// FUNÇÃO TELEPORTE
 local function teleportarJogador(dePortal, paraPortal)
 	if not scriptAtivado then return end
-	if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+	
+	local reference = getPlayerReference()
+	if not reference or not reference:FindFirstChild("HumanoidRootPart") then return end
 	
 	local playerName = player.Name
 	local agora = tick()
 	
-	-- VERIFICA COOLDOWN POR TIMESTAMP (CORRIGIDO)
 	if teleportCooldown[playerName] and (agora - teleportCooldown[playerName]) < tempoTeleporteCooldown then
 		return
 	end
 	
-	-- MARCA COOLDOWN
 	teleportCooldown[playerName] = agora
 	
 	local novaPosicao
@@ -684,12 +1313,12 @@ local function teleportarJogador(dePortal, paraPortal)
 	local rotacao = paraPortal.CFrame - paraPortal.CFrame.Position
 	novaPosicao = CFrame.new(novaPosicao.Position) * rotacao
 	
-	player.Character:SetPrimaryPartCFrame(novaPosicao)
-	-- NÃO PRECISA MAIS DO wait() AQUI, O TIMESTAMP GERENCIA O COOLDOWN
+	reference:SetPrimaryPartCFrame(novaPosicao)
 end
 
+--// FUNÇÃO CRIAR PORTAL (CORRIGIDA - PORTAS QUADRADAS AGORA FUNCIONAM IGUAL AS REDONDAS)
 local function criarPortal(posicao, olhandoPara)
-	if not player.Character then return end
+	if not getPlayerReference() then return end
 	local numeroPortal = obterProximoNumero()
 	local numeroPar = (numeroPortal % 2 == 1) and numeroPortal + 1 or numeroPortal - 1
 	local indicePar = math.ceil(numeroPortal / 2)
@@ -721,15 +1350,16 @@ local function criarPortal(posicao, olhandoPara)
 	elseif formatoPortal == "Retângulo" then
 		portal.Shape = Enum.PartType.Block
 		portal.Size = Vector3.new(0.5, tamanhoPortal * 1.3, tamanhoPortal * 0.8)
-		portal.CFrame = cframe
+		portal.CFrame = cframe * CFrame.Angles(0, math.rad(90), 0)
 	elseif formatoPortal == "Quadrado" then
 		portal.Shape = Enum.PartType.Block
 		portal.Size = Vector3.new(0.5, tamanhoPortal, tamanhoPortal)
-		portal.CFrame = cframe
+		portal.CFrame = cframe * CFrame.Angles(0, math.rad(90), 0)
 	elseif formatoPortal == "Triângulo" then
 		portal.Shape = Enum.PartType.Block
 		portal.Size = Vector3.new(0.5, tamanhoPortal, tamanhoPortal)
-		portal.CFrame = cframe
+		portal.CFrame = cframe * CFrame.Angles(0, math.rad(90), 0)
+		
 		local wedge1 = Instance.new("WedgePart")
 		wedge1.Size = Vector3.new(0.5, tamanhoPortal * 0.5, tamanhoPortal)
 		wedge1.Material = Enum.Material.Neon
@@ -845,8 +1475,9 @@ local function atualizarRotacaoPortaisSelecionados(novaRotacao)
 	end
 end
 
---// IDENTIFICADOR DE PORTAIS CRIADOS EM TEMPO REAL
-local portaisCriadosLabel = SectionPortais:CreateLabel("📋 Portais Criados: Nenhum")
+--// IDENTIFICADOR DE PORTAIS CRIADOS EM TEMPO REAL (CORRIGIDO - MULTILINHA)
+local portaisCriadosLabel = SectionPortais:CreateLabel("📋 Portais Criados:")
+local portaisListaLabel = SectionPortais:CreateLabel("Nenhum")
 
 local function atualizarListaPortais()
 	local numeros = {}
@@ -854,20 +1485,35 @@ local function atualizarListaPortais()
 		table.insert(numeros, num)
 	end
 	table.sort(numeros)
+	
 	if #numeros == 0 then
-		portaisCriadosLabel:Set("📋 Portais Criados: Nenhum")
+		portaisListaLabel:Set("Nenhum portal criado")
 	else
-		portaisCriadosLabel:Set("📋 Portais Criados: " .. table.concat(numeros, ", "))
+		-- Divide os números em linhas de até 15 números por linha
+		local linhas = {}
+		local linhaAtual = {}
+		for i, num in ipairs(numeros) do
+			table.insert(linhaAtual, tostring(num))
+			if #linhaAtual >= 15 or i == #numeros then
+				table.insert(linhas, table.concat(linhaAtual, " "))
+				linhaAtual = {}
+			end
+		end
+		
+		local textoFinal = table.concat(linhas, "\n")
+		portaisListaLabel:Set(textoFinal)
 	end
 end
 
 SectionPortais:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
 SectionPortais:CreateLabel("🎯 SELEÇÃO DE PORTAIS")
 
+--// INPUT SELECIONAR PORTAIS (TAMANHO GRANDE)
 local inputSelecionarPortais = SectionPortais:CreateInput({
 	Name = "Selecionar Portais (ex: 1,2,3 ou 1-5)",
 	PlaceholderText = "Digite os números",
 	RemoveTextAfterFocusLost = false,
+	Width = 300,
 	Callback = function(texto)
 		portaisSelecionados = processarNumeros(texto)
 		if #portaisSelecionados > 0 then
@@ -963,10 +1609,12 @@ SectionPortais:CreateSlider({
 SectionPortais:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
 SectionPortais:CreateLabel("📝 TEXTO PERSONALIZADO")
 
+--// INPUT TEXTO PARA PORTAL (TAMANHO GRANDE)
 local inputTextoPortal = SectionPortais:CreateInput({
 	Name = "✏️ Digite o texto para o portal",
 	PlaceholderText = "Ex: Entrada, Saída, Cuidado...",
 	RemoveTextAfterFocusLost = false,
+	Width = 300,
 	Callback = function(texto) end
 })
 
@@ -1035,7 +1683,19 @@ SectionPortais:CreateButton({
 })
 
 SectionPortais:CreateSlider({
-	Name = "📍 Distância de Aparição",
+	Name = "📍 Distância de aparição do portal",
+	Range = {1, 20},
+	Increment = 0.5,
+	Suffix = " studs",
+	CurrentValue = 4,
+	Callback = function(val)
+		distanciaCriacaoPortal = val
+		Rayfield:Notify({Title = "Distância Ajustada", Content = "Portais serão criados a " .. val .. " studs à frente", Duration = 1.5})
+	end
+})
+
+SectionPortais:CreateSlider({
+	Name = "📍 Distância de Aparição (Teleporte)",
 	Range = {1, 15},
 	Increment = 0.5,
 	Suffix = " studs",
@@ -1084,7 +1744,7 @@ SectionPortais:CreateLabel("━━━━━━━━━━━━━━━━━�
 SectionPortais:CreateLabel("➕ CRIAR NOVOS PORTAIS")
 
 SectionPortais:CreateToggle({
-	Name = "🎯 Portal na Frente (4 studs)",
+	Name = "🎯 Portal na Frente (distância ajustável)",
 	CurrentValue = false,
 	Callback = function(value)
 		portalAtivo = value
@@ -1127,10 +1787,12 @@ SectionPortais:CreateDropdown({
 SectionPortais:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
 SectionPortais:CreateLabel("🗑️ DELETAR PORTAIS")
 
+--// INPUT DELETAR PORTAIS (TAMANHO GRANDE)
 local inputDeletarPortais = SectionPortais:CreateInput({
 	Name = "Digite os números (ex: 1,2,3,5)",
 	PlaceholderText = "1,2,3 ou 1-5",
 	RemoveTextAfterFocusLost = false,
+	Width = 300,
 	Callback = function(texto) end
 })
 
@@ -1195,7 +1857,6 @@ SectionControles:CreateToggle({
 	end
 })
 
--- BOTÃO ADICIONAL PARA RESETAR COOLDOWN (CORREÇÃO)
 SectionControles:CreateButton({
 	Name = "🔄 Resetar Cooldown dos Portais",
 	Callback = function()
@@ -1255,13 +1916,15 @@ SectionControles:CreateLabel("ℹ️ INFO")
 SectionControles:CreateLabel("O script será reativado automaticamente")
 SectionControles:CreateLabel("após trocar de servidor")
 
---// EVENTOS DO MOUSE
+--// EVENTOS DO MOUSE (COMPATÍVEIS COM INVISIBLE FE)
 mouse.Button1Down:Connect(function()
 	if not scriptAtivado then return end
-	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	local reference = getPlayerReference()
+	if not reference then return end
+	local hrp = reference:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
 	if portalAtivo then
-		local posicao = (hrp.CFrame * CFrame.new(0, 0, -4)).Position
+		local posicao = (hrp.CFrame * CFrame.new(0, 0, -distanciaCriacaoPortal)).Position
 		local olhando = hrp.CFrame.LookVector
 		criarPortal(posicao, olhando)
 	elseif modoClique then
@@ -1272,7 +1935,7 @@ mouse.Button1Down:Connect(function()
 	end
 end)
 
---// RENDERIZAÇÃO
+--// RENDERIZAÇÃO (CÂMERAS)
 RunService.RenderStepped:Connect(function()
 	if vendoCamera and #cameras > 0 then
 		if cam.CameraSubject ~= cameras[cameraAtual] then
@@ -1281,12 +1944,16 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
---// DETECÇÃO DE PORTAIS (CORRIGIDA - COM VERIFICAÇÃO EXTRA)
+--// DETECÇÃO DE PORTAIS (COMPATÍVEL COM INVISIBLE FE)
 RunService.Heartbeat:Connect(function()
 	if not scriptAtivado then return end
-	if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
 	
-	local hrp = player.Character.HumanoidRootPart
+	local reference = getPlayerReference()
+	if not reference then return end
+	
+	local hrp = reference:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	
 	local playerPos = hrp.Position
 	
 	for numeroPortal, portal in pairs(portaisAtivos) do
@@ -1314,7 +1981,6 @@ RunService.Heartbeat:Connect(function()
 				end
 			end
 		else
-			-- Remove portal inválido automaticamente
 			portaisAtivos[numeroPortal] = nil
 		end
 	end
@@ -1325,1669 +1991,31 @@ spawn(function()
 	while true do
 		wait(1)
 		atualizarListaPortais()
-		atualizarListaCameras()
+		atualizarListaSelecionados()
 		atualizarInfo()
 	end
 end)
 
 --// INICIALIZAÇÃO
 atualizarListaPortais()
-atualizarListaCameras()
+atualizarListaSelecionados()
 atualizarInfo()
 
 if scriptAtivado then
-	Rayfield:Notify({Title = "✅ Script Carregado", Content = "Sistema Completo ativado!", Duration = 3})
+	Rayfield:Notify({Title = "✅ Script Carregado", Content = "Sistema Completo ativado! (Compatível com INVISIBLE FE)", Duration = 3})
 else
 	Rayfield:Notify({Title = "⚠️ Script Carregado (Desativado)", Content = "Ative o script na aba Controles", Duration = 3})
 end
 
 print("=========================================")
 print("✅ SISTEMA COMPLETO CARREGADO!")
-print("📷 Câmeras com seleção por número")
-print("🌀 Portais com lista em tempo real")
+print("✈️ CORREÇÃO: Aviões agora são criados virados para frente!")
+print("👻 COMPATÍVEL COM INVISIBLE FE!")
+print("✈️ Aviões com seleção múltipla e redimensionamento")
+print("🌀 Portais com lista em tempo real (MULTILINHA)")
 print("🎯 Teleporte corrigido (cooldown por timestamp)")
-print("📝 Texto personalizado para câmeras e portais")
-print("=========================================")    frame.Draggable = true
-    frame.Parent = screenGui
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = frame
-
-    local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.new(0, 30, 0, 30)
-    closeBtn.Position = UDim2.new(1, -35, 0, 5)
-    closeBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-    closeBtn.Text = "×"
-    closeBtn.TextColor3 = Color3.new(1, 1, 1)
-    closeBtn.TextSize = 20
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.BorderSizePixel = 0
-    closeBtn.Parent = frame
-
-    local closeCorner = Instance.new("UICorner")
-    closeCorner.CornerRadius = UDim.new(0, 8)
-    closeCorner.Parent = closeBtn
-
-    closeBtn.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
-    end)
-
-    local titulo = Instance.new("TextLabel")
-    titulo.Size = UDim2.new(1, 0, 0, 40)
-    titulo.Position = UDim2.new(0, 0, 0, 5)
-    titulo.BackgroundTransparency = 1
-    titulo.Text = "🔐 VERIFICAÇÃO DE KEY"
-    titulo.TextColor3 = Color3.new(1, 1, 1)
-    titulo.TextSize = 18
-    titulo.Font = Enum.Font.GothamBold
-    titulo.Parent = frame
-
-    local inputBox = Instance.new("TextBox")
-    inputBox.Size = UDim2.new(0.8, 0, 0, 35)
-    inputBox.Position = UDim2.new(0.1, 0, 0.4, 0)
-    inputBox.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-    inputBox.TextColor3 = Color3.new(1, 1, 1)
-    inputBox.PlaceholderText = "Digite a key"
-    inputBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
-    inputBox.Text = ""
-    inputBox.TextSize = 16
-    inputBox.Font = Enum.Font.Gotham
-    inputBox.ClearTextOnFocus = false
-    inputBox.Parent = frame
-
-    local inputCorner = Instance.new("UICorner")
-    inputCorner.CornerRadius = UDim.new(0, 6)
-    inputCorner.Parent = inputBox
-
-    local copyBtn = Instance.new("TextButton")
-    copyBtn.Size = UDim2.new(0, 80, 0, 30)
-    copyBtn.Position = UDim2.new(0.1, 0, 0.7, 0)
-    copyBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
-    copyBtn.Text = "📋 LINK"
-    copyBtn.TextColor3 = Color3.new(1, 1, 1)
-    copyBtn.TextSize = 14
-    copyBtn.Font = Enum.Font.GothamBold
-    copyBtn.BorderSizePixel = 0
-    copyBtn.Parent = frame
-
-    local copyCorner = Instance.new("UICorner")
-    copyCorner.CornerRadius = UDim.new(0, 6)
-    copyCorner.Parent = copyBtn
-
-    copyBtn.MouseButton1Click:Connect(function()
-        setclipboard(linkKey)
-        copyBtn.Text = "✅ COPIADO"
-        task.wait(1)
-        copyBtn.Text = "📋 LINK"
-    end)
-
-    local verifyBtn = Instance.new("TextButton")
-    verifyBtn.Size = UDim2.new(0, 120, 0, 30)
-    verifyBtn.Position = UDim2.new(0.6, 0, 0.7, 0)
-    verifyBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-    verifyBtn.Text = "🔍 VERIFICAR"
-    verifyBtn.TextColor3 = Color3.new(1, 1, 1)
-    verifyBtn.TextSize = 14
-    verifyBtn.Font = Enum.Font.GothamBold
-    verifyBtn.BorderSizePixel = 0
-    verifyBtn.Parent = frame
-
-    local verifyCorner = Instance.new("UICorner")
-    verifyCorner.CornerRadius = UDim.new(0, 6)
-    verifyCorner.Parent = verifyBtn
-
-    local erroLabel = Instance.new("TextLabel")
-    erroLabel.Size = UDim2.new(1, 0, 0, 20)
-    erroLabel.Position = UDim2.new(0, 0, 0.9, 0)
-    erroLabel.BackgroundTransparency = 1
-    erroLabel.Text = ""
-    erroLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
-    erroLabel.TextSize = 12
-    erroLabel.Font = Enum.Font.Gotham
-    erroLabel.Parent = frame
-
-    local function verificarKey()
-        local keyDigitada = inputBox.Text
-        if keyDigitada == keyCorreta then
-            keyAprovada = true
-            screenGui:Destroy()
-            mostrarMensagemBoasVindas()
-        else
-            erroLabel.Text = "❌ Key incorreta!"
-        end
-    end
-
-    verifyBtn.MouseButton1Click:Connect(verificarKey)
-
-    inputBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            verificarKey()
-        end
-    end)
-end
-
-local function mostrarMensagemBoasVindas()
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "BoasVindas"
-    screenGui.Parent = player:WaitForChild("PlayerGui")
-    screenGui.ResetOnSpawn = false
-
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 400, 0, 150)
-    frame.Position = UDim2.new(0.5, -200, 0.5, -75)
-    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    frame.BackgroundTransparency = 0.2
-    frame.BorderSizePixel = 0
-    frame.Active = true
-    frame.Parent = screenGui
-
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 10)
-    corner.Parent = frame
-
-    local texto = Instance.new("TextLabel")
-    texto.Size = UDim2.new(1, 0, 1, 0)
-    texto.BackgroundTransparency = 1
-    texto.Text = "SEJA BEM VINDO AO CÂMERA HUB"
-    texto.TextColor3 = Color3.new(1, 1, 1)
-    texto.TextSize = 24
-    texto.Font = Enum.Font.GothamBold
-    texto.TextWrapped = true
-    texto.Parent = frame
-
-    frame.BackgroundTransparency = 0.8
-    texto.TextTransparency = 0.8
-    local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-    local fadeIn = TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 0.2})
-    local fadeInText = TweenService:Create(texto, tweenInfo, {TextTransparency = 0})
-    fadeIn:Play()
-    fadeInText:Play()
-
-    task.wait(5)
-
-    local fadeOut = TweenService:Create(frame, tweenInfo, {BackgroundTransparency = 1})
-    local fadeOutText = TweenService:Create(texto, tweenInfo, {TextTransparency = 1})
-    fadeOut:Play()
-    fadeOutText:Play()
-    fadeOut.Completed:Connect(function()
-        screenGui:Destroy()
-    end)
-end
-
-criarPainelKey()
-
-repeat task.wait() until keyAprovada
-
--- ==================== SISTEMA DE VERSÃO ====================
-local VERSION = "2.1.0"
-local SCRIPT_URL = "https://raw.githubusercontent.com/seu_usuario/seu_repo/main/camera_hub.lua"
-local GITHUB_RAW_URL = "https://raw.githubusercontent.com/seu_usuario/seu_repo/main/version.txt"
-
-local function checkForUpdates()
-    local success, result = pcall(function()
-        return game:HttpGet(GITHUB_RAW_URL)
-    end)
-    
-    if success and result then
-        local latestVersion = result:match("VERSION=(%d+%.%d+%.%d+)")
-        if latestVersion and latestVersion ~= VERSION then
-            return true, latestVersion
-        end
-    end
-    return false, VERSION
-end
-
-local function updateScript()
-    local success, newScript = pcall(function()
-        return game:HttpGet(SCRIPT_URL)
-    end)
-    
-    if success and newScript then
-        return true, newScript
-    end
-    return false, nil
-end
-
--- ==================== INTERFACE DE ATUALIZAÇÃO ====================
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
-
-local Window = Rayfield:CreateWindow({
-    Name = "Sistema Completo v" .. VERSION,
-    LoadingTitle = "Camera Hub",
-    LoadingSubtitle = "Versão " .. VERSION,
-    Theme = "Dark"
-})
-
-local SectionVersao = Window:CreateTab("🔄 Atualizações", 4483362458)
-
-local versionLabel = SectionVersao:CreateLabel("📌 Versão Atual: " .. VERSION)
-local updateStatus = SectionVersao:CreateLabel("🔍 Verificando atualizações...")
-
-SectionVersao:CreateButton({
-    Name = "🔍 Verificar Atualizações",
-    Callback = function()
-        updateStatus:Set("⏳ Verificando...")
-        task.wait(1)
-        
-        local hasUpdate, latestVer = checkForUpdates()
-        
-        if hasUpdate then
-            updateStatus:Set("✅ Nova versão disponível: " .. latestVer)
-            Rayfield:Notify({
-                Title = "Atualização Disponível",
-                Content = "Versão " .. latestVer .. " disponível!",
-                Duration = 5
-            })
-        else
-            updateStatus:Set("✅ Você está na versão mais recente!")
-            Rayfield:Notify({
-                Title = "Sem Atualizações",
-                Content = "Versão " .. VERSION .. " é a mais recente",
-                Duration = 3
-            })
-        end
-    end
-})
-
-local updateButton = SectionVersao:CreateButton({
-    Name = "⬇️ ATUALIZAR SCRIPT",
-    Callback = function()
-        updateStatus:Set("⏳ Baixando atualização...")
-        
-        local success, newScript = updateScript()
-        
-        if success and newScript then
-            updateStatus:Set("✅ Script atualizado! Recarregando...")
-            Rayfield:Notify({
-                Title = "Atualização Concluída",
-                Content = "Script atualizado com sucesso!",
-                Duration = 3
-            })
-            
-            for _, v in pairs(getconnections(game:GetService("CoreGui").ChildAdded)) do
-                v:Disable()
-            end
-            
-            task.wait(1)
-            loadstring(newScript)()
-            
-            local gui = script:FindFirstAncestorWhichIsA("ScreenGui")
-            if gui then gui:Destroy() end
-        else
-            updateStatus:Set("❌ Erro ao baixar atualização!")
-            Rayfield:Notify({
-                Title = "Erro",
-                Content = "Não foi possível atualizar o script",
-                Duration = 3
-            })
-        end
-    end
-})
-
-SectionVersao:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
-SectionVersao:CreateLabel("📋 Instruções:")
-SectionVersao:CreateLabel("1. Clique em 'Verificar Atualizações'")
-SectionVersao:CreateLabel("2. Se houver atualização, clique em")
-SectionVersao:CreateLabel(" 'ATUALIZAR SCRIPT'")
-SectionVersao:CreateLabel("3. O script será recarregado")
-SectionVersao:CreateLabel(" automaticamente")
-SectionVersao:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
-
-spawn(function()
-    task.wait(2)
-    local hasUpdate, latestVer = checkForUpdates()
-    if hasUpdate then
-        updateStatus:Set("⚠️ Nova versão " .. latestVer .. " disponível!")
-        Rayfield:Notify({
-            Title = "Atualização Disponível",
-            Content = "Versão " .. latestVer .. " disponível! Vá em 'Atualizações'",
-            Duration = 7
-        })
-    else
-        updateStatus:Set("✅ Versão " .. VERSION .. " atualizada!")
-    end
-end)
-
--- ==================== SECTIONS RENOMEADAS ====================
-local SectionCriacaoCameras = Window:CreateTab("📷 Criação de Câmeras", 4483362458)
-local SectionCameras = Window:CreateTab("👁️ Visão das Câmeras", 4483362458)
-local SectionMovimento = Window:CreateTab("🏃 Movimento", 4483362458)
-local SectionPortais = Window:CreateTab("🌀 Portais", 4483362458)
-local SectionPlacas = Window:CreateTab("📋 Criação de Placas", 4483362458)
-
--- ==================== SERVIÇOS ====================
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local cam = workspace.CurrentCamera
-
--- ==================== VARIÁVEIS CÂMERAS ====================
-local cameras = {}
-local cameraAtual = 1
-local vendoCamera = false
-local speedAtivo = false
-local speedValor = 16
-
--- ==================== VARIÁVEIS PORTAIS ====================
-local portalAtivo = false
-local modoClique = false
-local formatoPortal = "Cilindro"
-local portaisAtivos = {}
-local paresPortais = {}
-local numerosDisponiveis = {}
-local maiorNumero = 0
-local teleportCooldown = {}
-local mouse = player:GetMouse()
-
-local portaisSelecionados = {}
-local alturaPortalClique = 3
-local tempoTeleporteCooldown = 1
-local tamanhoPortal = 6
-local distanciaAparicao = 3
-local ladoAparicao = "Frente"
-local transparenciaPortal = 0.3
-local rotacaoPortal = 0
-
--- ==================== VARIÁVEIS DE CONTROLE DO SCRIPT ====================
-local scriptAtivo = true
-local conexoesEventos = {}
-local loopsAtivos = {}
-
--- ==================== VARIÁVEIS PLACAS ====================
-local placas = {}
-local proximoNumeroPlaca = 1
-local tecladoGUI = nil
-local placaSelecionadaParaEdicao = nil
-local textoDigitado = ""
-local tecladoAtivo = false
-
--- Cores disponíveis para placas
-local coresPlacas = {
-    Marrom = Color3.fromRGB(139, 69, 19),
-    Vermelho = Color3.fromRGB(255, 0, 0),
-    Azul = Color3.fromRGB(0, 0, 255),
-    Verde = Color3.fromRGB(0, 255, 0),
-    Amarelo = Color3.fromRGB(255, 255, 0),
-    Preto = Color3.fromRGB(0, 0, 0),
-    Branco = Color3.fromRGB(255, 255, 255)
-}
-
--- ==================== FUNÇÕES CÂMERAS ====================
-local function criarCameraRealista(position)
-    local model = Instance.new("Model")
-    model.Name = "Camera3D"
-    model.Parent = workspace
-
-    local corpo = Instance.new("Part")
-    corpo.Size = Vector3.new(3, 2.5, 2.8)
-    corpo.Material = Enum.Material.SmoothPlastic
-    corpo.Color = Color3.fromRGB(25, 25, 25)
-    corpo.Anchored = true
-    corpo.CanCollide = false
-    corpo.CFrame = position
-    corpo.Parent = model
-
-    -- Adicionar propriedades para melhor visão à distância
-    local cameraPart = Instance.new("Camera")
-    cameraPart.Parent = model
-    cameraPart.Name = "CameraPart"
-    cameraPart.CFrame = position * CFrame.new(0, 0, 5)
-    
-    -- Criar um ponto de luz para ajudar na visibilidade
-    local pointLight = Instance.new("PointLight")
-    pointLight.Parent = corpo
-    pointLight.Range = 50
-    pointLight.Brightness = 2
-    pointLight.Color = Color3.fromRGB(255, 255, 200)
-
-    -- Restante do modelo da câmera...
-    local topo = Instance.new("Part")
-    topo.Size = Vector3.new(2.5, 0.8, 1.8)
-    topo.Material = Enum.Material.SmoothPlastic
-    topo.Color = Color3.fromRGB(30, 30, 30)
-    topo.Anchored = true
-    topo.CanCollide = false
-    topo.CFrame = corpo.CFrame * CFrame.new(0, 1.65, 0.3)
-    topo.Parent = model
-
-    local flash = Instance.new("Part")
-    flash.Shape = Enum.PartType.Ball
-    flash.Size = Vector3.new(0.5, 0.5, 0.5)
-    flash.Material = Enum.Material.Neon
-    flash.Color = Color3.fromRGB(255, 255, 200)
-    flash.Anchored = true
-    flash.CanCollide = false
-    flash.CFrame = topo.CFrame * CFrame.new(-0.8, 0, -0.6)
-    flash.Parent = model
-
-    local lente = Instance.new("Part")
-    lente.Shape = Enum.PartType.Cylinder
-    lente.Size = Vector3.new(1.2, 2.2, 2.2)
-    lente.Material = Enum.Material.Glass
-    lente.Color = Color3.fromRGB(15, 15, 20)
-    lente.Transparency = 0.2
-    lente.Reflectance = 0.6
-    lente.Anchored = true
-    lente.CanCollide = false
-    lente.CFrame = corpo.CFrame * CFrame.new(0, -0.2, -2) * CFrame.Angles(0, 0, math.rad(90))
-    lente.Parent = model
-
-    model.PrimaryPart = corpo
-    return corpo
-end
-
-player.CharacterAdded:Connect(function(char)
-    task.wait(0.5)
-    if scriptAtivo and vendoCamera and #cameras > 0 then
-        cam.CameraType = Enum.CameraType.Custom
-        cam.CameraSubject = cameras[cameraAtual]
-        -- Ajustar propriedades da câmera para melhor visão à distância
-        cam.FieldOfView = 70
-        cam.Focus = cameras[cameraAtual].CFrame * CFrame.new(0, 0, -100)
-    end
-    if scriptAtivo and speedAtivo then
-        local humanoid = char:WaitForChild("Humanoid", 5)
-        if humanoid then
-            humanoid.WalkSpeed = speedValor
-        end
-    end
-end)
-
--- Função para melhorar a visão da câmera
-local function melhorarVisaoCamera()
-    if vendoCamera and #cameras > 0 then
-        cam.FieldOfView = 70
-        -- Remover limites de distância da câmera
-        cam.MaxZoomDistance = math.huge
-        cam.MinZoomDistance = 0.5
-    end
-end
-
--- ==================== FUNÇÕES PORTAIS ====================
-local function gerarCores()
-    local hue = math.random(0, 360)
-    local cor1 = Color3.fromHSV(hue / 360, 0.8, 1)
-    local cor2 = Color3.fromHSV(hue / 360, 0.5, 1)
-    return cor1, cor2
-end
-
-local function obterProximoNumero()
-    if #numerosDisponiveis > 0 then
-        table.sort(numerosDisponiveis)
-        return table.remove(numerosDisponiveis, 1)
-    else
-        maiorNumero = maiorNumero + 1
-        return maiorNumero
-    end
-end
-
-local function liberarNumero(numero)
-    table.insert(numerosDisponiveis, numero)
-end
-
-local function teleportarJogador(dePortal, paraPortal)
-    if not scriptAtivo then return end
-    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
-    local playerName = player.Name
-    if teleportCooldown[playerName] then return end
-    teleportCooldown[playerName] = true
-    
-    local novaPosicao
-    if ladoAparicao == "Frente" then
-        novaPosicao = paraPortal.CFrame * CFrame.new(0, 0, -distanciaAparicao)
-    elseif ladoAparicao == "Trás" then
-        novaPosicao = paraPortal.CFrame * CFrame.new(0, 0, distanciaAparicao)
-    elseif ladoAparicao == "Esquerda" then
-        novaPosicao = paraPortal.CFrame * CFrame.new(-distanciaAparicao, 0, 0)
-    elseif ladoAparicao == "Direita" then
-        novaPosicao = paraPortal.CFrame * CFrame.new(distanciaAparicao, 0, 0)
-    elseif ladoAparicao == "Cima" then
-        novaPosicao = paraPortal.CFrame * CFrame.new(0, distanciaAparicao, 0)
-    elseif ladoAparicao == "Baixo" then
-        novaPosicao = paraPortal.CFrame * CFrame.new(0, -distanciaAparicao, 0)
-    end
-    
-    player.Character:SetPrimaryPartCFrame(novaPosicao)
-    task.wait(tempoTeleporteCooldown)
-    teleportCooldown[playerName] = nil
-end
-
-local function criarPortal(posicao, olhandoPara)
-    if not scriptAtivo then return end
-    if not player.Character then return end
-    local numeroPortal = obterProximoNumero()
-    local numeroPar = (numeroPortal % 2 == 1) and numeroPortal + 1 or numeroPortal - 1
-    local indicePar = math.ceil(numeroPortal / 2)
-    
-    if not paresPortais[indicePar] then
-        local cor1, cor2 = gerarCores()
-        paresPortais[indicePar] = {cor1 = cor1, cor2 = cor2}
-    end
-    
-    local cor = (numeroPortal % 2 == 1) and paresPortais[indicePar].cor1 or paresPortais[indicePar].cor2
-    local portal = Instance.new("Part")
-    portal.Name = "Portal_" .. numeroPortal
-    portal.Anchored = true
-    portal.CanCollide = false
-    portal.Material = Enum.Material.Neon
-    portal.Color = cor
-    portal.Transparency = transparenciaPortal
-    
-    local cframe = CFrame.new(posicao, posicao + olhandoPara) * CFrame.Angles(0, math.rad(rotacaoPortal), 0)
-    
-    if formatoPortal == "Cilindro" then
-        portal.Shape = Enum.PartType.Cylinder
-        portal.Size = Vector3.new(0.5, tamanhoPortal, tamanhoPortal)
-        portal.CFrame = cframe * CFrame.Angles(0, math.rad(90), 0)
-    elseif formatoPortal == "Esfera" then
-        portal.Shape = Enum.PartType.Ball
-        portal.Size = Vector3.new(tamanhoPortal, tamanhoPortal, tamanhoPortal)
-        portal.CFrame = cframe
-    elseif formatoPortal == "Retângulo" then
-        portal.Shape = Enum.PartType.Block
-        portal.Size = Vector3.new(0.5, tamanhoPortal * 1.3, tamanhoPortal * 0.8)
-        portal.CFrame = cframe
-    elseif formatoPortal == "Quadrado" then
-        portal.Shape = Enum.PartType.Block
-        portal.Size = Vector3.new(0.5, tamanhoPortal, tamanhoPortal)
-        portal.CFrame = cframe
-    elseif formatoPortal == "Triângulo" then
-        portal.Shape = Enum.PartType.Block
-        portal.Size = Vector3.new(0.5, tamanhoPortal, tamanhoPortal)
-        portal.CFrame = cframe
-        local wedge1 = Instance.new("WedgePart")
-        wedge1.Size = Vector3.new(0.5, tamanhoPortal * 0.5, tamanhoPortal)
-        wedge1.Material = Enum.Material.Neon
-        wedge1.Color = cor
-        wedge1.Transparency = transparenciaPortal
-        wedge1.Anchored = true
-        wedge1.CanCollide = false
-        wedge1.CFrame = portal.CFrame * CFrame.new(0, tamanhoPortal * 0.25, 0) * CFrame.Angles(0, 0, math.rad(180))
-        wedge1.Parent = portal
-    end
-    
-    portal.Parent = workspace
-    
-    local billboard = Instance.new("BillboardGui")
-    billboard.Size = UDim2.new(0, 100, 0, 100)
-    billboard.Adornee = portal
-    billboard.AlwaysOnTop = true
-    billboard.Parent = portal
-    
-    local textoNumero = Instance.new("TextLabel")
-    textoNumero.Size = UDim2.new(1, 0, 1, 0)
-    textoNumero.BackgroundTransparency = 1
-    textoNumero.Text = tostring(numeroPortal)
-    textoNumero.Font = Enum.Font.GothamBold
-    textoNumero.TextSize = 70
-    textoNumero.TextColor3 = Color3.new(1, 1, 1)
-    textoNumero.TextStrokeTransparency = 0
-    textoNumero.TextStrokeColor3 = Color3.new(0, 0, 0)
-    textoNumero.Parent = billboard
-    
-    local function criarZona(offsetZ)
-        local zona = Instance.new("Part")
-        zona.Name = "Zona_" .. numeroPortal
-        zona.Size = Vector3.new(tamanhoPortal + 1, tamanhoPortal + 3, 2)
-        zona.Transparency = 1
-        zona.CanCollide = false
-        zona.Anchored = true
-        zona.CFrame = portal.CFrame * CFrame.new(0, 0, offsetZ)
-        zona.Parent = portal
-        zona.Touched:Connect(function(hit)
-            if not scriptAtivo then return end
-            if hit.Parent and hit.Parent:FindFirstChild("Humanoid") then
-                if hit.Parent.Name == player.Name then
-                    local portalDestino = portaisAtivos[numeroPar]
-                    if portalDestino then teleportarJogador(portal, portalDestino) end
-                end
-            end
-        end)
-    end
-    
-    criarZona(3)
-    criarZona(-3)
-    portaisAtivos[numeroPortal] = portal
-    Rayfield:Notify({Title = "Portal #" .. numeroPortal .. " Criado", Content = "Teleporta para Portal #" .. numeroPar, Duration = 2})
-end
-
-local function processarNumeros(texto)
-    local numeros = {}
-    for parte in string.gmatch(texto, "[^,]+") do
-        parte = parte:match("^%s*(.-)%s*$")
-        if string.find(parte, "-") then
-            local inicio, fim = string.match(parte, "(%d+)%-(%d+)")
-            if inicio and fim then
-                inicio, fim = tonumber(inicio), tonumber(fim)
-                for i = inicio, fim do table.insert(numeros, i) end
-            end
-        else
-            local num = tonumber(parte)
-            if num then table.insert(numeros, num) end
-        end
-    end
-    return numeros
-end
-
-local function atualizarAlturaPortaisSelecionados(novaAltura)
-    for _, numero in ipairs(portaisSelecionados) do
-        local portal = portaisAtivos[numero]
-        if portal and portal.Parent then
-            local posicaoAtual = portal.Position
-            portal.Position = Vector3.new(posicaoAtual.X, posicaoAtual.Y + novaAltura, posicaoAtual.Z)
-        end
-    end
-end
-
-local function atualizarTamanhoPortaisSelecionados(novoTamanho)
-    for _, numero in ipairs(portaisSelecionados) do
-        local portal = portaisAtivos[numero]
-        if portal and portal.Parent then
-            if portal.Shape == Enum.PartType.Cylinder then
-                portal.Size = Vector3.new(0.5, novoTamanho, novoTamanho)
-            elseif portal.Shape == Enum.PartType.Ball then
-                portal.Size = Vector3.new(novoTamanho, novoTamanho, novoTamanho)
-            elseif portal.Shape == Enum.PartType.Block then
-                if portal.Size.Y > portal.Size.Z then
-                    portal.Size = Vector3.new(0.5, novoTamanho * 1.3, novoTamanho * 0.8)
-                else
-                    portal.Size = Vector3.new(0.5, novoTamanho, novoTamanho)
-                end
-            end
-            for _, child in ipairs(portal:GetChildren()) do
-                if child:IsA("WedgePart") then
-                    child.Size = Vector3.new(0.5, novoTamanho * 0.5, novoTamanho)
-                    child.CFrame = portal.CFrame * CFrame.new(0, novoTamanho * 0.25, 0) * CFrame.Angles(0, 0, math.rad(180))
-                end
-            end
-            for _, child in ipairs(portal:GetChildren()) do
-                if child.Name:match("Zona_") then
-                    child.Size = Vector3.new(novoTamanho + 1, novoTamanho + 3, 2)
-                end
-            end
-        end
-    end
-end
-
-local function atualizarTransparenciaPortaisSelecionados(novaTransparencia)
-    for _, numero in ipairs(portaisSelecionados) do
-        local portal = portaisAtivos[numero]
-        if portal and portal.Parent then
-            portal.Transparency = novaTransparencia
-            for _, child in ipairs(portal:GetChildren()) do
-                if child:IsA("WedgePart") then child.Transparency = novaTransparencia end
-            end
-        end
-    end
-end
-
-local function atualizarRotacaoPortaisSelecionados(novaRotacao)
-    for _, numero in ipairs(portaisSelecionados) do
-        local portal = portaisAtivos[numero]
-        if portal and portal.Parent then
-            local posicaoAtual = portal.Position
-            local novoCFrame = CFrame.new(posicaoAtual) * CFrame.Angles(0, math.rad(novaRotacao), 0)
-            if portal.Shape == Enum.PartType.Cylinder then
-                portal.CFrame = novoCFrame * CFrame.Angles(0, math.rad(90), 0)
-            else
-                portal.CFrame = novoCFrame
-            end
-            for _, child in ipairs(portal:GetChildren()) do
-                if child.Name:match("Zona_") then
-                    local offset = child.CFrame.Z > portal.CFrame.Z and 3 or -3
-                    child.CFrame = portal.CFrame * CFrame.new(0, 0, offset)
-                end
-            end
-        end
-    end
-end
-
--- ==================== FUNÇÕES PLACAS ====================
-local function criarTeclado()
-    if tecladoGUI then
-        tecladoGUI:Destroy()
-        tecladoGUI = nil
-    end
-    
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "TecladoPlaca"
-    screenGui.Parent = player:WaitForChild("PlayerGui")
-    screenGui.ResetOnSpawn = false
-    tecladoGUI = screenGui
-    
-    -- Fundo semi-transparente
-    local background = Instance.new("Frame")
-    background.Size = UDim2.new(1, 0, 1, 0)
-    background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    background.BackgroundTransparency = 0.5
-    background.Parent = screenGui
-    
-    -- Frame do teclado
-    local tecladoFrame = Instance.new("Frame")
-    tecladoFrame.Size = UDim2.new(0, 400, 0, 350)
-    tecladoFrame.Position = UDim2.new(0.5, -200, 0.6, -175)
-    tecladoFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    tecladoFrame.BorderSizePixel = 0
-    tecladoFrame.Parent = screenGui
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 12)
-    corner.Parent = tecladoFrame
-    
-    -- Label que mostra o texto digitado (acima do teclado)
-    local displayLabel = Instance.new("TextLabel")
-    displayLabel.Size = UDim2.new(0.9, 0, 0, 50)
-    displayLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
-    displayLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-    displayLabel.BackgroundTransparency = 0
-    displayLabel.Text = ""
-    displayLabel.TextColor3 = Color3.new(1, 1, 1)
-    displayLabel.TextSize = 20
-    displayLabel.Font = Enum.Font.Gotham
-    displayLabel.TextXAlignment = Enum.TextXAlignment.Left
-    displayLabel.Parent = tecladoFrame
-    
-    local displayCorner = Instance.new("UICorner")
-    displayCorner.CornerRadius = UDim.new(0, 8)
-    displayCorner.Parent = displayLabel
-    
-    -- Botão ENTER (acima do teclado)
-    local enterBtn = Instance.new("TextButton")
-    enterBtn.Size = UDim2.new(0, 100, 0, 40)
-    enterBtn.Position = UDim2.new(0.05, 0, 0.25, 0)
-    enterBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-    enterBtn.Text = "✓ ENTER"
-    enterBtn.TextColor3 = Color3.new(1, 1, 1)
-    enterBtn.TextSize = 16
-    enterBtn.Font = Enum.Font.GothamBold
-    enterBtn.BorderSizePixel = 0
-    enterBtn.Parent = tecladoFrame
-    
-    local enterCorner = Instance.new("UICorner")
-    enterCorner.CornerRadius = UDim.new(0, 8)
-    enterCorner.Parent = enterBtn
-    
-    -- Layout do teclado (linhas)
-    local linhasTeclado = {
-        {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"},
-        {"Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"},
-        {"A", "S", "D", "F", "G", "H", "J", "K", "L"},
-        {"Z", "X", "C", "V", "B", "N", "M", "⌫", "␣"}
-    }
-    
-    local yOffset = 0.35
-    local buttonWidth = 0.085
-    local buttonHeight = 0.08
-    
-    for linhaIndex, linha in ipairs(linhasTeclado) do
-        local totalButtons = #linha
-        local startX = (1 - (totalButtons * buttonWidth)) / 2
-        
-        for btnIndex, letra in ipairs(linha) do
-            local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(0, 35, 0, 35)
-            btn.Position = UDim2.new(startX + (btnIndex - 1) * buttonWidth, 0, yOffset, 0)
-            btn.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
-            btn.Text = letra
-            btn.TextColor3 = Color3.new(1, 1, 1)
-            btn.TextSize = 18
-            btn.Font = Enum.Font.GothamBold
-            btn.BorderSizePixel = 0
-            btn.Parent = tecladoFrame
-            
-            local btnCorner = Instance.new("UICorner")
-            btnCorner.CornerRadius = UDim.new(0, 6)
-            btnCorner.Parent = btn
-            
-            btn.MouseButton1Click:Connect(function()
-                if letra == "⌫" then
-                    textoDigitado = textoDigitado:sub(1, -2)
-                elseif letra == "␣" then
-                    textoDigitado = textoDigitado .. " "
-                else
-                    textoDigitado = textoDigitado .. letra
-                end
-                displayLabel.Text = textoDigitado
-            end)
-        end
-        yOffset = yOffset + 0.12
-    end
-    
-    enterBtn.MouseButton1Click:Connect(function()
-        if placaSelecionadaParaEdicao and placas[placaSelecionadaParaEdicao] then
-            -- Atualizar texto na placa
-            local placaInfo = placas[placaSelecionadaParaEdicao]
-            if placaInfo.surfaceGui then
-                for _, child in ipairs(placaInfo.surfaceGui:GetChildren()) do
-                    if child:IsA("TextLabel") then
-                        child.Text = textoDigitado
-                        child.TextScaled = true
-                        child.TextWrapped = true
-                    end
-                end
-            end
-            Rayfield:Notify({Title = "Texto Atualizado", Content = "Placa #" .. placaSelecionadaParaEdicao, Duration = 2})
-        end
-        -- Fechar teclado
-        if tecladoGUI then
-            tecladoGUI:Destroy()
-            tecladoGUI = nil
-        end
-        tecladoAtivo = false
-        textoDigitado = ""
-    end)
-end
-
--- NOVA FUNÇÃO: Criar placa com suporte (pauzinho)
-local function criarPlaca(posicao, facingDirection)
-    if not scriptAtivo then return end
-    
-    local numeroPlaca = proximoNumeroPlaca
-    proximoNumeroPlaca = proximoNumeroPlaca + 1
-    
-    -- Criar MODEL para agrupar placa e suporte
-    local model = Instance.new("Model")
-    model.Name = "Placa_" .. numeroPlaca
-    model.Parent = workspace
-    
-    -- Calcular CFrame para a placa ficar virada para o jogador
-    local playerPos = player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position or posicao
-    local direction = (playerPos - posicao).Unit
-    local cframe = CFrame.new(posicao, posicao + Vector3.new(direction.X, 0, direction.Z))
-    
-    -- ====== PLACA PRINCIPAL (maior: 6x3 para caber mais texto) ======
-    local placa = Instance.new("Part")
-    placa.Name = "PlacaPrincipal"
-    placa.Size = Vector3.new(6, 3, 0.2) -- Aumentado de 4x2 para 6x3
-    placa.Material = Enum.Material.Wood
-    placa.Color = Color3.fromRGB(139, 69, 19) -- Marrom
-    placa.Anchored = true
-    placa.CanCollide = false
-    placa.CFrame = cframe * CFrame.new(0, 1.5, 0) -- Elevado para ficar acima do suporte
-    placa.Parent = model
-    
-    -- ====== SUPORTE (pauzinho embaixo da placa) ======
-    local suporte = Instance.new("Part")
-    suporte.Name = "Suporte"
-    suporte.Size = Vector3.new(0.4, 2.5, 0.4) -- Pauzinho fino
-    suporte.Material = Enum.Material.Wood
-    suporte.Color = Color3.fromRGB(101, 67, 33) -- Marrom mais escuro
-    suporte.Anchored = true
-    suporte.CanCollide = false
-    -- Posicionar o suporte no centro da placa, descendo para baixo
-    suporte.CFrame = cframe * CFrame.new(0, 0.25, 0) -- Parte inferior da placa na altura 0.25
-    suporte.Parent = model
-    
-    -- ====== BASE DO SUPORTE (opcional, para dar estabilidade) ======
-    local base = Instance.new("Part")
-    base.Name = "Base"
-    base.Size = Vector3.new(1, 0.3, 1)
-    base.Material = Enum.Material.Wood
-    base.Color = Color3.fromRGB(101, 67, 33)
-    base.Anchored = true
-    base.CanCollide = false
-    base.CFrame = cframe * CFrame.new(0, -1.15, 0) -- Base no chão
-    base.Parent = model
-    
-    -- SurfaceGui para o texto (na placa principal)
-    local surfaceGui = Instance.new("SurfaceGui")
-    surfaceGui.Face = Enum.NormalId.Front
-    surfaceGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-    surfaceGui.PixelsPerStud = 50
-    surfaceGui.Parent = placa
-    
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.BackgroundTransparency = 1
-    textLabel.Text = ""
-    textLabel.TextColor3 = Color3.new(1, 1, 1)
-    textLabel.TextSize = 30
-    textLabel.Font = Enum.Font.GothamBold
-    textLabel.TextScaled = true
-    textLabel.TextWrapped = true
-    textLabel.Parent = surfaceGui
-    
-    -- Billboard para o número (acima da placa)
-    local billboard = Instance.new("BillboardGui")
-    billboard.Size = UDim2.new(0, 60, 0, 60)
-    billboard.Adornee = placa
-    billboard.AlwaysOnTop = true
-    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
-    billboard.Parent = model
-    
-    local numeroLabel = Instance.new("TextLabel")
-    numeroLabel.Size = UDim2.new(1, 0, 1, 0)
-    numeroLabel.BackgroundTransparency = 1
-    numeroLabel.Text = tostring(numeroPlaca)
-    numeroLabel.TextColor3 = Color3.new(1, 1, 1)
-    numeroLabel.TextSize = 40
-    numeroLabel.Font = Enum.Font.GothamBold
-    numeroLabel.TextStrokeTransparency = 0
-    numeroLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-    numeroLabel.Parent = billboard
-    
-    -- ClickDetector para editar texto (na placa principal)
-    local clickDetector = Instance.new("ClickDetector")
-    clickDetector.Parent = placa
-    clickDetector.MaxActivationDistance = 20
-    
-    clickDetector.MouseClick:Connect(function()
-        if not scriptAtivo then return end
-        placaSelecionadaParaEdicao = numeroPlaca
-        textoDigitado = ""
-        if tecladoGUI then
-            tecladoGUI:Destroy()
-            tecladoGUI = nil
-        end
-        criarTeclado()
-        tecladoAtivo = true
-    end)
-    
-    -- Armazenar referências (usando a placa principal como referência)
-    placas[numeroPlaca] = {
-        model = model,
-        part = placa,
-        suporte = suporte,
-        base = base,
-        surfaceGui = surfaceGui,
-        textLabel = textLabel,
-        numero = numeroPlaca
-    }
-    
-    Rayfield:Notify({Title = "Placa Criada", Content = "Placa #" .. numeroPlaca .. " (com suporte)", Duration = 2})
-end
-
-local function mudarCorPlaca(numeroPlaca, cor)
-    if placas[numeroPlaca] and placas[numeroPlaca].part then
-        placas[numeroPlaca].part.Color = cor
-        -- Também mudar cor do suporte e base para combinar?
-        if placas[numeroPlaca].suporte then
-            placas[numeroPlaca].suporte.Color = Color3.fromRGB(cor.R * 0.7, cor.G * 0.7, cor.B * 0.7)
-        end
-        if placas[numeroPlaca].base then
-            placas[numeroPlaca].base.Color = Color3.fromRGB(cor.R * 0.7, cor.G * 0.7, cor.B * 0.7)
-        end
-        Rayfield:Notify({Title = "Cor Alterada", Content = "Placa #" .. numeroPlaca .. " mudou de cor", Duration = 1.5})
-    else
-        Rayfield:Notify({Title = "Erro", Content = "Placa #" .. numeroPlaca .. " não encontrada", Duration = 2})
-    end
-end
-
-local function mudarTextoPlaca(numeroPlaca, novoTexto)
-    if placas[numeroPlaca] and placas[numeroPlaca].textLabel then
-        placas[numeroPlaca].textLabel.Text = novoTexto
-        Rayfield:Notify({Title = "Texto Alterado", Content = "Placa #" .. numeroPlaca, Duration = 1.5})
-    else
-        Rayfield:Notify({Title = "Erro", Content = "Placa #" .. numeroPlaca .. " não encontrada", Duration = 2})
-    end
-end
-
-local function deletarPlaca(numeroPlaca)
-    if placas[numeroPlaca] then
-        if placas[numeroPlaca].model then
-            placas[numeroPlaca].model:Destroy()
-        elseif placas[numeroPlaca].part then
-            placas[numeroPlaca].part:Destroy()
-        end
-        placas[numeroPlaca] = nil
-        Rayfield:Notify({Title = "Placa Deletada", Content = "Placa #" .. numeroPlaca .. " removida", Duration = 2})
-    end
-end
-
-local function limparTodasPlacas()
-    for _, placaInfo in pairs(placas) do
-        if placaInfo.model then
-            placaInfo.model:Destroy()
-        elseif placaInfo.part then
-            placaInfo.part:Destroy()
-        end
-    end
-    placas = {}
-    proximoNumeroPlaca = 1
-    Rayfield:Notify({Title = "Todas Placas", Content = "Todas as placas foram removidas", Duration = 2})
-end
-
--- ==================== FUNÇÃO DE DESATIVAÇÃO COMPLETA ====================
-local function desativarScriptCompleto()
-    scriptAtivo = false
-    
-    -- Desativar visão da câmera
-    vendoCamera = false
-    cam.CameraType = Enum.CameraType.Custom
-    local char = player.Character
-    if char then
-        local humanoid = char:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            cam.CameraSubject = humanoid
-        end
-    end
-    
-    -- Resetar velocidade
-    speedAtivo = false
-    if char and char:FindFirstChildOfClass("Humanoid") then
-        char.Humanoid.WalkSpeed = 16
-    end
-    
-    -- Fechar todas as GUIs
-    for _, gui in ipairs(player.PlayerGui:GetChildren()) do
-        if gui:IsA("ScreenGui") and (gui.Name == "Rayfield" or gui.Name == "KeySystem" or gui.Name == "BoasVindas" or gui.Name == "TecladoPlaca") then
-            gui:Destroy()
-        end
-    end
-    
-    -- Fechar Rayfield especificamente
-    if Rayfield and Rayfield.Close then
-        Rayfield:Close()
-    end
-    
-    print("Script desativado completamente!")
-end
-
--- ==================== ABA Criação de Câmeras ====================
-SectionCriacaoCameras:CreateButton({
-    Name = "📷 Criar Câmera Realista",
-    Callback = function()
-        if not scriptAtivo then return end
-        local char = player.Character
-        if not char then return end
-        local head = char:FindFirstChild("Head")
-        if not head then return end
-        local cameraPart = criarCameraRealista(head.CFrame * CFrame.new(0, 3, -5))
-        table.insert(cameras, cameraPart)
-        cameraAtual = #cameras
-        Rayfield:Notify({Title = "✅ Câmera Criada", Content = "Câmera realista #"..cameraAtual.." criada!", Duration = 3})
-    end
-})
-
-SectionCriacaoCameras:CreateButton({
-    Name = "🔁 Trocar Câmera",
-    Callback = function()
-        if not scriptAtivo then return end
-        if #cameras <= 1 then return end
-        cameraAtual += 1
-        if cameraAtual > #cameras then cameraAtual = 1 end
-        if vendoCamera then cam.CameraSubject = cameras[cameraAtual] end
-        Rayfield:Notify({Title = "Câmera Trocada", Content = "Câmera #"..cameraAtual, Duration = 2})
-    end
-})
-
-SectionCriacaoCameras:CreateButton({
-    Name = "🗑️ Deletar Câmera Atual",
-    Callback = function()
-        if not scriptAtivo then return end
-        if #cameras == 0 then return end
-        local cameraPart = cameras[cameraAtual]
-        if cameraPart and cameraPart.Parent then cameraPart.Parent:Destroy() end
-        table.remove(cameras, cameraAtual)
-        if cameraAtual > #cameras then cameraAtual = math.max(1, #cameras) end
-        if #cameras == 0 then
-            vendoCamera = false
-            cam.CameraType = Enum.CameraType.Custom
-            local char = player.Character
-            if char then
-                local humanoid = char:FindFirstChildOfClass("Humanoid")
-                if humanoid then cam.CameraSubject = humanoid end
-            end
-        end
-        Rayfield:Notify({Title = "Câmera Deletada", Content = "Câmera removida com sucesso", Duration = 2})
-    end
-})
-
--- ==================== ABA Visão das Câmeras ====================
-SectionCameras:CreateToggle({
-    Name = "👁️ Ver pela Câmera",
-    CurrentValue = false,
-    Callback = function(value)
-        if not scriptAtivo then return end
-        if #cameras == 0 then
-            Rayfield:Notify({Title = "Aviso", Content = "Nenhuma câmera criada", Duration = 3})
-            return
-        end
-        vendoCamera = value
-        if vendoCamera then
-            cam.CameraType = Enum.CameraType.Custom
-            cam.CameraSubject = cameras[cameraAtual]
-            melhorarVisaoCamera()
-        else
-            cam.CameraType = Enum.CameraType.Custom
-            local char = player.Character
-            if char then
-                local humanoid = char:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    cam.CameraSubject = humanoid
-                end
-            end
-        end
-    end
-})
-
-SectionCameras:CreateButton({
-    Name = "🔧 Melhorar Visão da Câmera",
-    Callback = function()
-        if not scriptAtivo then return end
-        melhorarVisaoCamera()
-        Rayfield:Notify({Title = "Visão Otimizada", Content = "Câmera ajustada para longas distâncias", Duration = 2})
-    end
-})
-
--- ==================== ABA Movimento ====================
-SectionMovimento:CreateToggle({
-    Name = "⚡ Ativar Speed",
-    CurrentValue = false,
-    Callback = function(value)
-        if not scriptAtivo then return end
-        speedAtivo = value
-        local char = player.Character
-        if char then
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            if humanoid then humanoid.WalkSpeed = speedAtivo and speedValor or 16 end
-        end
-    end
-})
-
-SectionMovimento:CreateSlider({
-    Name = "Velocidade",
-    Range = {16,100},
-    Increment = 1,
-    Suffix = "Studs",
-    CurrentValue = 16,
-    Callback = function(val)
-        if not scriptAtivo then return end
-        speedValor = val
-        if speedAtivo then
-            local char = player.Character
-            if char then
-                local humanoid = char:FindFirstChildOfClass("Humanoid")
-                if humanoid then humanoid.WalkSpeed = speedValor end
-            end
-        end
-    end
-})
-
--- ==================== ABA Portais ====================
-SectionPortais:CreateLabel("🎯 SELEÇÃO DE PORTAIS")
-
-local inputSelecionarPortais = SectionPortais:CreateInput({
-    Name = "Selecionar Portais (ex: 1,2,3 ou 1-5)",
-    PlaceholderText = "Digite os números",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(texto)
-        if not scriptAtivo then return end
-        portaisSelecionados = processarNumeros(texto)
-        if #portaisSelecionados > 0 then
-            Rayfield:Notify({Title = "Portais Selecionados", Content = #portaisSelecionados .. " portal(is) selecionado(s)!", Duration = 2})
-        end
-    end
-})
-
-SectionPortais:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
-SectionPortais:CreateLabel("🔧 EDITAR PORTAIS SELECIONADOS")
-
-SectionPortais:CreateSlider({
-    Name = "⬆️ Altura (Selecionados)",
-    Range = {-10, 20},
-    Increment = 0.5,
-    Suffix = " studs",
-    CurrentValue = 0,
-    Callback = function(val)
-        if not scriptAtivo then return end
-        if #portaisSelecionados == 0 then
-            Rayfield:Notify({Title = "Aviso", Content = "Selecione portais primeiro!", Duration = 2})
-            return
-        end
-        atualizarAlturaPortaisSelecionados(val - alturaPortalClique)
-        alturaPortalClique = val
-    end
-})
-
-SectionPortais:CreateSlider({
-    Name = "📏 Tamanho (Selecionados)",
-    Range = {2, 20},
-    Increment = 0.5,
-    Suffix = " studs",
-    CurrentValue = 6,
-    Callback = function(val)
-        if not scriptAtivo then return end
-        if #portaisSelecionados == 0 then
-            Rayfield:Notify({Title = "Aviso", Content = "Selecione portais primeiro!", Duration = 2})
-            return
-        end
-        tamanhoPortal = val
-        atualizarTamanhoPortaisSelecionados(val)
-    end
-})
-
-SectionPortais:CreateSlider({
-    Name = "👻 Transparência (Selecionados)",
-    Range = {0, 1},
-    Increment = 0.05,
-    Suffix = "",
-    CurrentValue = 0.3,
-    Callback = function(val)
-        if not scriptAtivo then return end
-        if #portaisSelecionados == 0 then
-            Rayfield:Notify({Title = "Aviso", Content = "Selecione portais primeiro!", Duration = 2})
-            return
-        end
-        transparenciaPortal = val
-        atualizarTransparenciaPortaisSelecionados(val)
-    end
-})
-
-SectionPortais:CreateSlider({
-    Name = "🔄 Rotação (Selecionados)",
-    Range = {0, 360},
-    Increment = 5,
-    Suffix = "°",
-    CurrentValue = 0,
-    Callback = function(val)
-        if not scriptAtivo then return end
-        if #portaisSelecionados == 0 then
-            Rayfield:Notify({Title = "Aviso", Content = "Selecione portais primeiro!", Duration = 2})
-            return
-        end
-        rotacaoPortal = val
-        atualizarRotacaoPortaisSelecionados(val)
-    end
-})
-
-SectionPortais:CreateSlider({
-    Name = "📍 Distância de Aparição",
-    Range = {1, 15},
-    Increment = 0.5,
-    Suffix = " studs",
-    CurrentValue = 3,
-    Callback = function(val)
-        if not scriptAtivo then return end
-        distanciaAparicao = val
-        Rayfield:Notify({Title = "Distância Ajustada", Content = "Aparecerá a " .. val .. " studs", Duration = 1.5})
-    end
-})
-
-SectionPortais:CreateDropdown({
-    Name = "🧭 Lado de Aparição",
-    Options = {"Frente", "Trás", "Esquerda", "Direita", "Cima", "Baixo"},
-    CurrentOption = {"Frente"},
-    MultipleOptions = false,
-    Callback = function(option)
-        if not scriptAtivo then return end
-        ladoAparicao = option[1]
-        Rayfield:Notify({Title = "Lado Alterado", Content = "Aparição: " .. ladoAparicao, Duration = 2})
-    end
-})
-
-SectionPortais:CreateSlider({
-    Name = "⏱️ Cooldown de Teleporte",
-    Range = {0, 10},
-    Increment = 0.5,
-    Suffix = " seg",
-    CurrentValue = 1,
-    Callback = function(val)
-        if not scriptAtivo then return end
-        tempoTeleporteCooldown = val
-        Rayfield:Notify({Title = "Cooldown Ajustado", Content = val .. " segundos entre teleportes", Duration = 1.5})
-    end
-})
-
-SectionPortais:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
-SectionPortais:CreateLabel("➕ CRIAR NOVOS PORTAIS")
-
-SectionPortais:CreateToggle({
-    Name = "🎯 Portal na Frente (4 studs)",
-    CurrentValue = false,
-    Callback = function(value)
-        if not scriptAtivo then return end
-        portalAtivo = value
-        if value then modoClique = false end
-    end
-})
-
-SectionPortais:CreateToggle({
-    Name = "🖱️ Portal no Clique",
-    CurrentValue = false,
-    Callback = function(value)
-        if not scriptAtivo then return end
-        modoClique = value
-        if value then portalAtivo = false end
-    end
-})
-
-SectionPortais:CreateSlider({
-    Name = "⬆️ Altura do Portal (Modo Clique)",
-    Range = {0, 20},
-    Increment = 0.5,
-    Suffix = " studs",
-    CurrentValue = 3,
-    Callback = function(val)
-        if not scriptAtivo then return end
-        alturaPortalClique = val
-        Rayfield:Notify({Title = "Altura Ajustada", Content = "Portal será criado a " .. val .. " studs do chão", Duration = 1.5})
-    end
-})
-
-SectionPortais:CreateDropdown({
-    Name = "🔷 Formato do Portal",
-    Options = {"Cilindro", "Esfera", "Retângulo", "Quadrado", "Triângulo"},
-    CurrentOption = {"Cilindro"},
-    MultipleOptions = false,
-    Callback = function(option)
-        if not scriptAtivo then return end
-        formatoPortal = option[1]
-        Rayfield:Notify({Title = "Formato Alterado", Content = "Portal: " .. formatoPortal, Duration = 2})
-    end
-})
-
-SectionPortais:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
-SectionPortais:CreateLabel("🗑️ DELETAR PORTAIS")
-
-local inputDeletarPortais = SectionPortais:CreateInput({
-    Name = "Digite os números (ex: 1,2,3,5)",
-    PlaceholderText = "1,2,3 ou 1-5",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(texto) end
-})
-
-SectionPortais:CreateButton({
-    Name = "🗑️ DELETAR Portais Selecionados",
-    Callback = function()
-        if not scriptAtivo then return end
-        local texto = inputDeletarPortais.CurrentValue or ""
-        if texto == "" then
-            Rayfield:Notify({Title = "Erro", Content = "Digite os números dos portais!", Duration = 3})
-            return
-        end
-        local portaisDeletados = 0
-        local numerosParaDeletar = processarNumeros(texto)
-        for _, num in ipairs(numerosParaDeletar) do
-            if portaisAtivos[num] then
-                portaisAtivos[num]:Destroy()
-                portaisAtivos[num] = nil
-                liberarNumero(num)
-                portaisDeletados = portaisDeletados + 1
-            end
-        end
-        if portaisDeletados > 0 then
-            Rayfield:Notify({Title = "Portais Deletados", Content = portaisDeletados .. " portal(is) removido(s)!", Duration = 3})
-        else
-            Rayfield:Notify({Title = "Aviso", Content = "Nenhum portal encontrado", Duration = 3})
-        end
-    end
-})
-
-SectionPortais:CreateButton({
-    Name = "🗑️ DELETAR Todos os Portais",
-    Callback = function()
-        if not scriptAtivo then return end
-        for numero, portal in pairs(portaisAtivos) do portal:Destroy() end
-        portaisAtivos = {}
-        paresPortais = {}
-        numerosDisponiveis = {}
-        maiorNumero = 0
-        teleportCooldown = {}
-        portaisSelecionados = {}
-        Rayfield:Notify({Title = "Portais", Content = "Todos os portais deletados!", Duration = 3})
-    end
-})
-
-SectionPortais:CreateLabel("Info: 1↔2 | 3↔4 | 5↔6 | 7↔8...")
-
--- ==================== ABA Criação de Placas ====================
-SectionPlacas:CreateLabel("📋 SISTEMA DE PLACAS")
-SectionPlacas:CreateLabel("Clique no chão para criar uma placa COM SUPORTE")
-
-local criarPlacaAtivo = false
-
-SectionPlacas:CreateToggle({
-    Name = "🖱️ Ativar Criação de Placas (Clique no chão)",
-    CurrentValue = false,
-    Callback = function(value)
-        if not scriptAtivo then return end
-        criarPlacaAtivo = value
-        if value then
-            Rayfield:Notify({Title = "Modo Placa Ativado", Content = "Clique no chão para criar placas COM SUPORTE", Duration = 2})
-        else
-            Rayfield:Notify({Title = "Modo Placa Desativado", Content = "Clique não cria mais placas", Duration = 2})
-        end
-    end
-})
-
-SectionPlacas:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
-SectionPlacas:CreateLabel("🎯 SELECIONAR PLACA")
-
-local inputSelecionarPlaca = SectionPlacas:CreateInput({
-    Name = "Digite o número da placa",
-    PlaceholderText = "Ex: 1, 2, 3...",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(texto)
-        if not scriptAtivo then return end
-        local numero = tonumber(texto)
-        if numero and placas[numero] then
-            placaSelecionadaParaEdicao = numero
-            Rayfield:Notify({Title = "Placa Selecionada", Content = "Placa #" .. numero .. " selecionada", Duration = 2})
-        elseif numero then
-            Rayfield:Notify({Title = "Erro", Content = "Placa #" .. numero .. " não encontrada", Duration = 2})
-        end
-    end
-})
-
-SectionPlacas:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
-SectionPlacas:CreateLabel("🎨 CORES PARA PLACA SELECIONADA")
-
--- Botões de cores para placa selecionada
-for corNome, corValor in pairs(coresPlacas) do
-    SectionPlacas:CreateButton({
-        Name = "🎨 " .. corNome,
-        Callback = function()
-            if not scriptAtivo then return end
-            if placaSelecionadaParaEdicao then
-                mudarCorPlaca(placaSelecionadaParaEdicao, corValor)
-            else
-                Rayfield:Notify({Title = "Erro", Content = "Selecione uma placa primeiro!", Duration = 2})
-            end
-        end
-    })
-end
-
-SectionPlacas:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
-SectionPlacas:CreateLabel("✏️ EDITAR TEXTO DA PLACA")
-
-local inputNovoTexto = SectionPlacas:CreateInput({
-    Name = "Digite o novo texto",
-    PlaceholderText = "Digite o texto para a placa",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(texto) end
-})
-
-SectionPlacas:CreateButton({
-    Name = "📝 Aplicar Texto na Placa Selecionada",
-    Callback = function()
-        if not scriptAtivo then return end
-        local novoTexto = inputNovoTexto.CurrentValue
-        if placaSelecionadaParaEdicao and novoTexto and novoTexto ~= "" then
-            mudarTextoPlaca(placaSelecionadaParaEdicao, novoTexto)
-            inputNovoTexto:Set("")
-        elseif not placaSelecionadaParaEdicao then
-            Rayfield:Notify({Title = "Erro", Content = "Selecione uma placa primeiro!", Duration = 2})
-        elseif not novoTexto or novoTexto == "" then
-            Rayfield:Notify({Title = "Erro", Content = "Digite um texto!", Duration = 2})
-        end
-    end
-})
-
-SectionPlacas:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
-SectionPlacas:CreateLabel("🗑️ DELETAR PLACAS")
-
-local inputDeletarPlaca = SectionPlacas:CreateInput({
-    Name = "Digite o número da placa para deletar",
-    PlaceholderText = "Ex: 1, 2, 3...",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(texto) end
-})
-
-SectionPlacas:CreateButton({
-    Name = "🗑️ Deletar Placa Selecionada",
-    Callback = function()
-        if not scriptAtivo then return end
-        local texto = inputDeletarPlaca.CurrentValue
-        local numero = tonumber(texto)
-        if numero then
-            deletarPlaca(numero)
-            inputDeletarPlaca:Set("")
-            if placaSelecionadaParaEdicao == numero then
-                placaSelecionadaParaEdicao = nil
-            end
-        else
-            Rayfield:Notify({Title = "Erro", Content = "Digite um número válido!", Duration = 2})
-        end
-    end
-})
-
-SectionPlacas:CreateButton({
-    Name = "🗑️ Deletar TODAS as Placas",
-    Callback = function()
-        if not scriptAtivo then return end
-        limparTodasPlacas()
-        placaSelecionadaParaEdicao = nil
-    end
-})
-
-SectionPlacas:CreateLabel("━━━━━━━━━━━━━━━━━━━━")
-SectionPlacas:CreateLabel("📊 INFORMAÇÕES")
-
-local placasInfoLabel = SectionPlacas:CreateLabel("Placas criadas: 0")
-
--- Atualizar contador de placas
-spawn(function()
-    while scriptAtivo and task.wait(1) do
-        local count = 0
-        for _ in pairs(placas) do count = count + 1 end
-        placasInfoLabel:Set("Placas criadas: " .. count)
-    end
-end)
-
--- ==================== ABA Extras ====================
-local SectionExtras = Window:CreateTab("⚙️ Extras", 4483362458)
-
-SectionExtras:CreateButton({
-    Name = "🔧 Diagnosticar e Corrigir Portais",
-    Callback = function()
-        if not scriptAtivo then return end
-        local corrigidos = 0
-        for num, portal in pairs(portaisAtivos) do
-            if not portal or not portal.Parent then
-                portaisAtivos[num] = nil
-                liberarNumero(num)
-                corrigidos = corrigidos + 1
-            else
-                local temZonaFrente = false
-                local temZonaTras = false
-                for _, child in ipairs(portal:GetChildren()) do
-                    if child.Name:match("Zona_") then
-                        if child.CFrame.Z > portal.CFrame.Z then temZonaFrente = true end
-                        if child.CFrame.Z < portal.CFrame.Z then temZonaTras = true end
-                    end
-                end
-                if not (temZonaFrente and temZonaTras) then
-                    for _, child in ipairs(portal:GetChildren()) do
-                        if child.Name:match("Zona_") then child:Destroy() end
-                    end
-                    local function criarZona(offsetZ)
-                        local zona = Instance.new("Part")
-                        zona.Name = "Zona_" .. num
-                        zona.Size = Vector3.new(tamanhoPortal + 1, tamanhoPortal + 3, 2)
-                        zona.Transparency = 1
-                        zona.CanCollide = false
-                        zona.Anchored = true
-                        zona.CFrame = portal.CFrame * CFrame.new(0, 0, offsetZ)
-                        zona.Parent = portal
-                        zona.Touched:Connect(function(hit)
-                            if not scriptAtivo then return end
-                            if hit.Parent and hit.Parent:FindFirstChild("Humanoid") then
-                                if hit.Parent.Name == player.Name then
-                                    local numeroPar = (num % 2 == 1) and num + 1 or num - 1
-                                    local portalDestino = portaisAtivos[numeroPar]
-                                    if portalDestino then teleportarJogador(portal, portalDestino) end
-                                end
-                            end
-                        end)
-                    end
-                    criarZona(3)
-                    criarZona(-3)
-                    corrigidos = corrigidos + 1
-                end
-            end
-        end
-        Rayfield:Notify({
-            Title = "Diagnóstico Concluído",
-            Content = corrigidos > 0 and ("Corrigidos " .. corrigidos .. " portal(is)") or "Nenhum problema encontrado",
-            Duration = 3
-        })
-    end
-})
-
-SectionExtras:CreateButton({
-    Name = "⛔ DESATIVAR SCRIPT COMPLETAMENTE",
-    Callback = function()
-        desativarScriptCompleto()
-    end
-})
-
-SectionExtras:CreateToggle({
-    Name = "🛡️ Proteção Anti-Ban (Simulação)",
-    CurrentValue = false,
-    Callback = function(value)
-        if value then
-            Rayfield:Notify({Title = "Proteção Ativada", Content = "Modo furtivo ativo (simulação)", Duration = 2})
-        else
-            Rayfield:Notify({Title = "Proteção Desativada", Content = "Modo normal", Duration = 2})
-        end
-    end
-})
-
-local antiLagAtivo = false
-local qualidadeOriginal = settings().Rendering.QualityLevel
-
-SectionExtras:CreateToggle({
-    Name = "⚡ Anti-Lag (Melhora desempenho)",
-    CurrentValue = false,
-    Callback = function(value)
-        if not scriptAtivo then return end
-        antiLagAtivo = value
-        if value then
-            qualidadeOriginal = settings().Rendering.QualityLevel
-            settings().Rendering.QualityLevel = 1
-            local lighting = game:GetService("Lighting")
-            lighting.GlobalShadows = false
-            lighting.FogEnd = 1e10
-            Rayfield:Notify({Title = "Anti-Lag Ativado", Content = "Qualidade reduzida para máximo desempenho", Duration = 2})
-        else
-            settings().Rendering.QualityLevel = qualidadeOriginal
-            local lighting = game:GetService("Lighting")
-            lighting.GlobalShadows = true
-            lighting.FogEnd = 100000
-            Rayfield:Notify({Title = "Anti-Lag Desativado", Content = "Qualidade restaurada", Duration = 2})
-        end
-    end
-})
-
-local nomeInput = SectionExtras:CreateInput({
-    Name = "✏️ Digite um nome para o script",
-    PlaceholderText = "Ex: Meu Hub",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(texto) end
-})
-
-SectionExtras:CreateButton({
-    Name = "✅ Aplicar Nome",
-    Callback = function()
-        if not scriptAtivo then return end
-        local novoNome = nomeInput.CurrentValue
-        if novoNome and novoNome ~= "" then
-            for _, gui in ipairs(player.PlayerGui:GetChildren()) do
-                if gui.Name == "Rayfield" then
-                    local function findTitleFrame(f)
-                        for _, child in ipairs(f:GetChildren()) do
-                            if child:IsA("TextLabel") and child.Text:find("Sistema Completo") then
-   
+print("📝 Texto personalizado para aviões e portais")
+print("📍 Distância de aparição do portal ajustável")
+print("🟩 Portais quadrados funcionam igual os redondos!")
+print("📋 Lista de portais agora mostra até 15 números por linha!")
+print("=========================================")
